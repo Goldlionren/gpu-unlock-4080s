@@ -40,4 +40,4 @@ FINAL status=0x8000000000000006 phase=cold-prom-profile attempted=0 firmware_sta
 
 09:19 已沿用现有证书签名并安装：核验系统 ESP、全部资产、原签名 EFI，备份后更换 GPUUnlock EFI/manifest，再回读哈希和验签；原 Windows EFI 未变，安装前后信任库精确匹配、SecureBoot=1、SetupMode=0，临时挂载撤销成功。未改密钥、启动顺序或重启。隔离构建保留旧 bundle 依赖的原 build 文件。
 
-本机记录为 `LOCAL-disk-install/20261026-091913-selector-state-bb826bcf/install-state.json`，同目录保留旧签名 EFI 和 manifest。当前只完成修复版安装，实机执行及性能仍待下一次报告；此前 RUN07 的成功不覆盖此新构建。
+本机记录为 `LOCAL-disk-install/20261026-091913-selector-state-bb826bcf/install-state.json`，同目录保留旧签名 EFI 和 manifest。09:19 时仅完成安装；10:50 的 [RUN09 独立验收](../selector-state-run09/README.md) 已确认同一修复构建从 0/0 初态实机执行成功并恢复 Tensor 提升。原构建时未实测标记保持原样。

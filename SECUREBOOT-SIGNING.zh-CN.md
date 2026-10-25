@@ -1,5 +1,7 @@
 # 本机签名与 Secure Boot 登记
 
+最新验收（2026-10-26 10:50）：[RUN09](evidence/selector-state-run09/README.md) 已确认修复版在 Secure Boot 开启时从初始选择器 0/0 成功执行事务、恢复并返回 Windows，随后两次现场测量确认 Tensor 提升。当前已安装签名 EFI SHA256 为 `13ce504d6639614a7fe73ea94228079993274dcf6a282cf27f73ff28f5b260a2`，沿用原证书与固件信任，无需重复登记。下文 00:59 的哈希和 RUN03 属于首次签名版本的历史记录。
+
 2026-10-26 00:59 状态：**本机 Secure Boot 开启后的硬盘 EFI 启动、GPU 事务与返回 Windows 已实测成功。** 已在 Admin 账户生成 RSA-2048 / SHA-256 本机签名证书，私钥以不可导出方式保存在 CurrentUser\My。已签署实测 0.2.0 EFI，安装到原 ESP 的 `\EFI\GPUUnlock\GPUUnlock.efi`，并完成固件信任登记。证据见 [RUN03 报告与验收说明](evidence/secureboot-stage3-0.2.0-run03/README.md)。不需要再次登记密钥。
 
 00:43 历史状态：用户完成 BIOS Custom / Reset to Setup Mode 并执行登记后，已独立重新读取固件。原 PK、KEK、dbx 与最新备份逐字节一致，db 与“原库加一张本机签名证书”逐字节一致。当时 SetupMode 仍为 1、SecureBoot 为 0，状态为 KEYS_VERIFIED_MODE_PENDING，因此先保持关闭并重启后只读复核。

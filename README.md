@@ -1,22 +1,31 @@
 # RTX 4080 SUPER 16GB UEFI unlock experiment
 
-**当前状态（2026-10-26 09:19）：RUN08 暴露出 SS0/SS1 初值均为 0 的入口误拒绝。已安装取消初值白名单、保留读取有效性与稳定性检查的修复版；67 个应用场景和 48 个核心事务模拟场景通过，新的实机启动结果仍待确认。** [RUN08 与修复说明](evidence/selector-state-run08/README.md)。下方 RUN03/RUN07 成功记录属于各自历史构建，不代表最新修复版已经实测成功。
+**最新实测（2026-10-26 10:50）：RUN09 已从初始 SS0=0、SS1=0 成功解锁，硬盘启动、Secure Boot 开启并返回 Windows，Tensor 性能提升得到两次现场测量确认。** [RUN09 原始报告、数据与验收](evidence/selector-state-run09/README.md)。
 
-**2026-10-26：本机已验证硬盘 EFI 启动、Secure Boot 开启、GPU 解锁事务成功并返回 Windows，无需 U 盘。** 0.2.0 的 [RUN03 报告与验收说明](evidence/secureboot-stage3-0.2.0-run03/README.md) 记录 `secure_boot=1 internal_volume=1`、FLR 前后选择器匹配和恢复成功；Windows 确认 Secure Boot=True、SetupMode=0，四项信任库符合登记计划。此前关闭 Secure Boot 的 [RUN00 证据](evidence/disk-boot-stage3-0.2.0-run00/verification.json) 保留。
+本次修复取消了初始 SS0/SS1 的固定值白名单，要求读取有效、PROM 校验前后三次一致，保留板卡身份、PROM、其他初始寄存器及最终解锁/恢复检查。RUN09 中选择器由 `0/0` 变为 `0x88888888/8`，FLR 前后匹配，事务和恢复成功；FBPA 仍是已知非致命不匹配。67 个应用流程场景、48 个核心事务模拟场景通过。
 
-使用本机证书签署 EFI，并在固件 db 登记该证书；这是本机自定义信任实测，不是微软通用签名。每次仍需按 U 执行事务。步骤见 [硬盘启动说明](DISK-BOOT-SECUREBOOT.zh-CN.md) 和 [签名、登记与 Secure Boot 实测](SECUREBOOT-SIGNING.zh-CN.md)。**RUN03 当时未重新测量性能，下方完整性能表仍属于 Secure Boot 关闭时的 0.1.2；后续 RUN07 的单尺寸测量单独记录。**
+使用本机证书签署 EFI，并在固件 db 登记该证书；这是本机自定义信任实测，不是微软通用签名。无需 U 盘，每次仍需按 U 执行事务。步骤见 [硬盘启动说明](DISK-BOOT-SECUREBOOT.zh-CN.md) 和 [签名与 Secure Boot 实测](SECUREBOOT-SIGNING.zh-CN.md)。本次验证覆盖一个零初态启动，不承诺所有重启、其他板卡或长期运行均已验证。
 
-**后续问题（08:23）：RUN04/RUN05 的初始 SS0 为 `0x64113036`，断电复测 RUN06 为 `0x64113037`，均不符合固定初值 `0x64113035`，因此在固件事务开始前拒绝。** RUN03 的一次成功不代表重复启动已稳定。随后先增加完整初始状态诊断，当时仍拒绝这些初值；详见 [失败记录与诊断改动](evidence/cold-profile-stage3-0.2.0/FINDINGS.zh-CN.md)。
-
-08:39 更新：诊断版 RUN07 的初始 SS0 回到 `0x64113035` 且复读稳定，Secure Boot 开启，事务及恢复成功；随后两次 8192-only 测量均值 FP16 **177.66**、BF16 **184.03 TFLOPS**，当前性能接近历史解锁结果。见 [RUN07 核验与原始数据](evidence/cold-profile-stage3-0.2.0/RUN07-verification.json)。这不是通过放宽条件取得的成功，也未解决 `…36/37` 初值的变化原因或兼容性。
-
-08:43 更新：已按用户要求安装[有限 SS0 兼容补丁](evidence/ss0-workaround/README.md)，仅允许本机观察到的完整初值 `0x64113035/36/37`，要求 PROM 校验前后三次读取一致，其余身份、状态、PROM、目标选择器及恢复检查不变。Secure Boot 保持开启，旧签名 EFI 已备份。**58 个应用流程测试、43 个核心事务模拟场景通过；新增 `…36/37` 路径的实机成功仍待验证，不能用 RUN07 的 `…35` 成功替代。**
+开发证据保留：[早期 Secure Boot 成功 RUN03](evidence/secureboot-stage3-0.2.0-run03/README.md)、[初始值变化与 RUN07](evidence/cold-profile-stage3-0.2.0/FINDINGS.zh-CN.md)、[有限白名单尝试](evidence/ss0-workaround/README.md)、[RUN08 失败与最终准入修复](evidence/selector-state-run08/README.md)。初值变化的硬件原因尚未确定，初值不再作为固定身份条件。
 
 Windows 11 Pro 上的真实实机适配与测量。性能归档版本 **stage3-0.1.2**，硬盘与 Secure Boot 实测版本 **stage3-0.2.0-disk-candidate**：在 Windows 启动前运行自定义 UEFI 程序，核对 SS0/SS1 写入及 FLR 后读回，恢复设备后进入原 Windows。
 
 **这是单块已测板卡的实验代码，不是通用 RTX 40 系列工具。** 入口固定为 AD103、`10de:2702 / 19da:4702`、16GB、特定 BAR/ROM 哈希与 Intel GOP 拓扑。不刷写 VBIOS、不替换 NVIDIA Windows 驱动。其他板卡应被检查拒绝，不能靠删除检查获得兼容性。
 
-## 实测结果
+## 最新 RUN09：Secure Boot 开启
+
+同一原 ComfyUI Python 环境，驱动 581.57、PyTorch 2.12.1+cu130 / CUDA 13.0；原基准仅执行 8192 尺寸，两次吞吐均值：
+
+| 类型 | 历史原版 TFLOPS | RUN09 TFLOPS | 相对历史原版 |
+|---|---:|---:|---:|
+| FP32_STRICT（TF32 关闭） | 35.7495 | 35.8125 | +0.18% |
+| FP16 | 108.2125 | 177.6150 | **+64.14%** |
+| BF16 | 108.2415 | 183.9780 | **+69.97%** |
+| FP8 E4M3 | 199.4165 | 310.4375 | **+55.67%** |
+
+FP32 基本持平，不将 +0.18% 解释为可归因于解锁的提升。历史原版测试使用完整尺寸序列，本次只测 8192；未严格控制温度、频率和背景负载，相同 API 标签不证明实际机器内核完全一致。原始数据、逐次结果和哈希见 [RUN09 证据](evidence/selector-state-run09/README.md)。
+
+## 历史 0.1.2：Secure Boot 关闭
 
 原驱动 581.57、PyTorch 2.12.1+cu130 / CUDA 13.0、相同基准和精度设置。8192×8192 GEMM 两次吞吐均值：
 

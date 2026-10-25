@@ -1,5 +1,7 @@
 # 硬盘启动与 Secure Boot：0.2.0 本机实测
 
+最新验收（2026-10-26 10:50）：修复初始选择器固定值检查后的 [RUN09](evidence/selector-state-run09/README.md) 已在 Secure Boot 开启时从 0/0 初态完成解锁和恢复，返回 Windows 后两次 8192 测量均值 FP16 177.615、BF16 183.978 TFLOPS。该修复通过读取有效性、三次稳定性及其余身份/PROM 检查判断准入，不再逐个追加初值白名单。下文 RUN00/RUN03 记录保持历史状态。
+
 日期：2026-10-25。目标为这台 Windows 11 Pro / NUC12 / RTX 4080 SUPER 16GB。
 
 更新至 2026-10-26 00:59：已安装到本机 ESP、创建独立启动项，完成本机证书签名与固件信任登记。**RUN03 已验证 Secure Boot 开启时从硬盘执行 GPU 事务，用户确认按 U 后成功返回 Windows。** Windows Confirm-SecureBootUEFI=True、SetupMode=0，PK/KEK/db/dbx 全部符合登记计划；报告包含 `secure_boot=1 internal_volume=1`。见 [RUN03 原始报告与验收说明](evidence/secureboot-stage3-0.2.0-run03/README.md)。本次没有新性能数据，0.1.2 的历史性能不能直接作为本次性能结果。

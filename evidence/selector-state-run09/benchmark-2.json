@@ -1,0 +1,91 @@
+{
+  "timestamp": "2026-10-26T10:50:12+11:00",
+  "machine": "Windows-11-10.0.26200-SP0",
+  "python": "3.13.12",
+  "pytorch": "2.12.1+cu130",
+  "torch_cuda": "13.0",
+  "gpu": "NVIDIA GeForce RTX 4080 SUPER",
+  "compute_capability": [
+    8,
+    9
+  ],
+  "gpu_mem_total_mib": 16376,
+  "smi": "NVIDIA GeForce RTX 4080 SUPER, 0x270210DE, 0x470219DA, 581.57, 95.03.44.00.dd, 16376 MiB, 15662 MiB, 320.00 W",
+  "precision_settings": {
+    "float32_matmul_precision": "highest",
+    "allow_tf32": false,
+    "allow_fp16_reduced_precision_reduction": true,
+    "allow_bf16_reduced_precision_reduction": true
+  },
+  "benchmark": "PyTorch mm / torch._scaled_mm, CUDA events; no unlock, no altered model precision",
+  "rows": [
+    {
+      "median_ms": 30.8095,
+      "tflops": 35.687,
+      "repetitions_per_trial": 15,
+      "trials": 5,
+      "trial_ms": [
+        30.27421,
+        31.08808,
+        30.56449,
+        30.8095,
+        30.83223
+      ],
+      "size": 8192,
+      "dtype": "FP32_STRICT",
+      "status": "OK",
+      "kernel": "torch.mm"
+    },
+    {
+      "median_ms": 6.20203,
+      "tflops": 177.283,
+      "repetitions_per_trial": 15,
+      "trials": 5,
+      "trial_ms": [
+        6.40697,
+        6.32564,
+        6.19138,
+        6.20203,
+        6.18346
+      ],
+      "size": 8192,
+      "dtype": "FP16",
+      "status": "OK",
+      "kernel": "torch.mm"
+    },
+    {
+      "median_ms": 5.99272,
+      "tflops": 183.475,
+      "repetitions_per_trial": 15,
+      "trials": 5,
+      "trial_ms": [
+        6.0132,
+        6.07976,
+        5.99095,
+        5.99272,
+        5.99067
+      ],
+      "size": 8192,
+      "dtype": "BF16",
+      "status": "OK",
+      "kernel": "torch.mm"
+    },
+    {
+      "median_ms": 3.57308,
+      "tflops": 307.721,
+      "repetitions_per_trial": 15,
+      "trials": 5,
+      "trial_ms": [
+        3.59779,
+        3.53874,
+        3.5784,
+        3.55962,
+        3.57308
+      ],
+      "size": 8192,
+      "dtype": "FP8_E4M3",
+      "status": "OK",
+      "kernel": "torch._scaled_mm, BF16 output, fast_accum=False; includes cached output allocation"
+    }
+  ]
+}

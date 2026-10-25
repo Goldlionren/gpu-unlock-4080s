@@ -1,0 +1,33 @@
+{
+  "status": "UNLOCKED_PERFORMANCE_LIKELY",
+  "hardware_unlock_state_verified": false,
+  "method": "Both runs of FP16 and BF16 within 15% of one profile; run spread <=10%. Empirical thresholds, not calibrated confidence.",
+  "reasons": [],
+  "rows": [
+    {
+      "dtype": "FP16",
+      "current_tflops": [
+        177.947,
+        177.283
+      ],
+      "mean_tflops": 177.615,
+      "stock_mean_tflops": 108.2125,
+      "unlocked_mean_tflops": 173.993,
+      "gain_vs_stock_percent": 64.13538177197644
+    },
+    {
+      "dtype": "BF16",
+      "current_tflops": [
+        184.481,
+        183.475
+      ],
+      "mean_tflops": 183.978,
+      "stock_mean_tflops": 108.2415,
+      "unlocked_mean_tflops": 181.4745,
+      "gain_vs_stock_percent": 69.96992835465142
+    }
+  ],
+  "limitations": "No current SS0/SS1 read. Load, throttling or kernel selection may alter results; stock-like speed cannot prove locked state. Same API label does not prove identical machine kernel.",
+  "measurement_started_at": "2026-10-26T10:50:05+11:00",
+  "benchmark_sha256": "9f96279a43f8d5a72e60a9deaf2327e2701c6a2b9e5f882930dff5f30ef5d9b2"
+}

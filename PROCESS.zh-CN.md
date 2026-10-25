@@ -2,6 +2,8 @@
 
 记录日期：2026-10-25。时间采用原始记录中的 Australia/Sydney 时区，当日 UTC+11。
 
+最新后续（2026-10-26 10:50）：[RUN09 实测](evidence/selector-state-run09/README.md) 已验证 Secure Boot 开启、硬盘启动以及从 SS0/SS1=0/0 初态完成解锁；修复了把可变选择器初值用作固定身份条件的入口问题。新的 8192 两次均值 FP16 177.615、BF16 183.978 TFLOPS，FP32 35.8125 TFLOPS（相对历史原版 +0.18%，基本持平）。新数据与下面的 0.1.2 历史数据分开归档，未覆盖长期稳定性或所有初始状态。
+
 后续进展（2026-10-26）：0.2.0 已在本机完成硬盘启动及 **Secure Boot 开启时的 GPU 事务与返回 Windows**，见 [RUN03 实测证据](evidence/secureboot-stage3-0.2.0-run03/README.md) 和 [签名登记说明](SECUREBOOT-SIGNING.zh-CN.md)。该轮没有重新跑性能基准；本文下方的 0.1.2、Secure Boot 关闭条件及原始 FP32/Tensor 数据保持原样。
 
 本报告对应本机 RTX 4080 SUPER 16GB、Windows 11 Pro、Secure Boot 关闭、自定义 UEFI 程序先于 Windows 显卡驱动执行的实验。成功程序版本为 **stage3-0.1.2**，成功实机记录为 **RUN05**。

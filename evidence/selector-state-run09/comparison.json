@@ -1,0 +1,73 @@
+{
+  "scope": "Historical full-size-sequence stock versus current 8192-only measurements, two samples each. Same environment/precision/API labels; no exact machine-kernel or controlled thermal/background-load claim.",
+  "stock_source_sha256": {
+    "rtx4080s_tensor_stock_20261025_171931.json": "2296c2c01683a72ae93e7ba7e7365c372bfa3b66894543068d82423ee536f0b1",
+    "rtx4080s_tensor_stock_20261025_172003.json": "c30248c14a8e569085f65a749d7b73fbc8fc4d6dfec8ac60052008b115abf376"
+  },
+  "rows": [
+    {
+      "size": 8192,
+      "dtype": "FP32_STRICT",
+      "kernel_label": "torch.mm",
+      "stock_tflops": [
+        35.902,
+        35.597
+      ],
+      "run09_tflops": [
+        35.938,
+        35.687
+      ],
+      "stock_mean_tflops": 35.7495,
+      "run09_mean_tflops": 35.8125,
+      "gain_vs_historical_stock_percent": 0.18
+    },
+    {
+      "size": 8192,
+      "dtype": "FP16",
+      "kernel_label": "torch.mm",
+      "stock_tflops": [
+        108.229,
+        108.196
+      ],
+      "run09_tflops": [
+        177.947,
+        177.283
+      ],
+      "stock_mean_tflops": 108.2125,
+      "run09_mean_tflops": 177.615,
+      "gain_vs_historical_stock_percent": 64.14
+    },
+    {
+      "size": 8192,
+      "dtype": "BF16",
+      "kernel_label": "torch.mm",
+      "stock_tflops": [
+        108.276,
+        108.207
+      ],
+      "run09_tflops": [
+        184.481,
+        183.475
+      ],
+      "stock_mean_tflops": 108.2415,
+      "run09_mean_tflops": 183.978,
+      "gain_vs_historical_stock_percent": 69.97
+    },
+    {
+      "size": 8192,
+      "dtype": "FP8_E4M3",
+      "kernel_label": "torch._scaled_mm, BF16 output, fast_accum=False; includes cached output allocation",
+      "stock_tflops": [
+        209.721,
+        189.112
+      ],
+      "run09_tflops": [
+        313.154,
+        307.721
+      ],
+      "stock_mean_tflops": 199.41649999999998,
+      "run09_mean_tflops": 310.4375,
+      "gain_vs_historical_stock_percent": 55.67
+    }
+  ]
+}
