@@ -1,0 +1,29 @@
+{
+  "build_id": "07b47e3faa0774de3321b4f6f947b085285b9bc11917f24523e041262c426e17",
+  "signed_efi_sha256": "4f8dc5e53fecc34861a9c7259c5af48b634cc135849b52eceb9f34d070cb7ed2",
+  "file_sha256": {
+    "RUN07-REPORT.TXT": "a5faae0a9a5e0c74e54ed4abb66550ec54dbb7e3884d48381e91cb484a799f9e",
+    "RUN07-performance-status.json": "68b35fb3ae730ad6b6e6bc105b93d5ee54c15be4ba05ad5d99c9d749bdbc976f",
+    "RUN07-benchmark-1.json": "8e3cf8c9454872d2789c1feb12751022f4f06ed233c57c64778ed25bc6e05143",
+    "RUN07-benchmark-2.json": "def432e7c0a77b4d1311c13ec7e477c2ffff6794a56a005afcfea14c2bfc8991"
+  },
+  "matched_report_markers": [
+    "build_id=07b47e3faa0774de3321b4f6f947b085285b9bc11917f24523e041262c426e17",
+    "boot policy: secure_boot=1 internal_volume=1 firmware_authentication_not_overridden=1",
+    "cold selectors repeat: SS0 first=0x64113035 second=0x64113035 SS1 first=0x2 second=0x2 stable=1",
+    "PROM double-read and exact board hash matched=1",
+    "TRANSACTION OUTCOME: result=0 firmware_started=1 required_plm=1 all_plm=0 selectors_before_flr=1 selectors_after_flr=1 recovered=1",
+    "transaction result=0 containment=0 started=1 quiesced=1 retained=0 maps=0",
+    "FINAL status=0 phase=transaction attempted=1 firmware_started=1 restored_entry_command=0 performance_validated=0"
+  ],
+  "secure_boot": 1,
+  "windows_secure_boot_from_collector": true,
+  "windows_boot_utc_from_collector": "2026-10-25T21:37:44.5000000Z",
+  "windows_arrival_user_reported": true,
+  "same_boot_independently_verified": false,
+  "performance_measurement_started_at": "2026-10-26T08:39:12+11:00",
+  "performance_scope": "Two fresh 8192-only runs of the unchanged baseline in the original Python environment. Empirical measurements, not correctness or stability validation. Historical reference used the full size sequence.",
+  "initial_ss0": "0x64113035",
+  "ss0_36_or_37_compatibility_verified": false,
+  "initial_value_variation_cause_resolved": false
+}

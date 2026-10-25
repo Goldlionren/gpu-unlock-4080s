@@ -2,9 +2,11 @@
 
 **2026-10-26：本机已验证硬盘 EFI 启动、Secure Boot 开启、GPU 解锁事务成功并返回 Windows，无需 U 盘。** 0.2.0 的 [RUN03 报告与验收说明](evidence/secureboot-stage3-0.2.0-run03/README.md) 记录 `secure_boot=1 internal_volume=1`、FLR 前后选择器匹配和恢复成功；Windows 确认 Secure Boot=True、SetupMode=0，四项信任库符合登记计划。此前关闭 Secure Boot 的 [RUN00 证据](evidence/disk-boot-stage3-0.2.0-run00/verification.json) 保留。
 
-使用本机证书签署 EFI，并在固件 db 登记该证书；这是本机自定义信任实测，不是微软通用签名。每次仍需按 U 执行事务。步骤见 [硬盘启动说明](DISK-BOOT-SECUREBOOT.zh-CN.md) 和 [签名、登记与 Secure Boot 实测](SECUREBOOT-SIGNING.zh-CN.md)。**本次未重新测量性能，下面的数据仍属于 Secure Boot 关闭时的 0.1.2。**
+使用本机证书签署 EFI，并在固件 db 登记该证书；这是本机自定义信任实测，不是微软通用签名。每次仍需按 U 执行事务。步骤见 [硬盘启动说明](DISK-BOOT-SECUREBOOT.zh-CN.md) 和 [签名、登记与 Secure Boot 实测](SECUREBOOT-SIGNING.zh-CN.md)。**RUN03 当时未重新测量性能，下方完整性能表仍属于 Secure Boot 关闭时的 0.1.2；后续 RUN07 的单尺寸测量单独记录。**
 
 **后续问题（08:23）：RUN04/RUN05 的初始 SS0 为 `0x64113036`，断电复测 RUN06 为 `0x64113037`，均不符合固定初值 `0x64113035`，因此在固件事务开始前拒绝。** RUN03 的一次成功不代表重复启动已稳定。当前源码增加完整初始状态诊断，仍拒绝这些初值，没有将新状态视为兼容；详见 [失败记录与诊断改动](evidence/cold-profile-stage3-0.2.0/FINDINGS.zh-CN.md)。
+
+08:39 更新：诊断版 RUN07 的初始 SS0 回到 `0x64113035` 且复读稳定，Secure Boot 开启，事务及恢复成功；随后两次 8192-only 测量均值 FP16 **177.66**、BF16 **184.03 TFLOPS**，当前性能接近历史解锁结果。见 [RUN07 核验与原始数据](evidence/cold-profile-stage3-0.2.0/RUN07-verification.json)。这不是通过放宽条件取得的成功，也未解决 `…36/37` 初值的变化原因或兼容性。
 
 Windows 11 Pro 上的真实实机适配与测量。性能归档版本 **stage3-0.1.2**，硬盘与 Secure Boot 实测版本 **stage3-0.2.0-disk-candidate**：在 Windows 启动前运行自定义 UEFI 程序，核对 SS0/SS1 写入及 FLR 后读回，恢复设备后进入原 Windows。
 
