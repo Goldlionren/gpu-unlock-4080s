@@ -1,0 +1,22 @@
+{
+  "report_build_id": "e49ef765604e53658702e6db4c96846b5ab8b181e1af049280c4f0bbcc44a418",
+  "file_sha256": {
+    "RUN08-REPORT.TXT": "74e3c1ce0c80cddcabc0ffe865cc19c28e35b717135fed43e84402320837debf",
+    "RUN08-performance-status.json": "e9a4524d6a4fe8108c950600ede5354b02fa2f7de932e39416f571019d411952",
+    "RUN08-benchmark-1.json": "eca2473bb20a30880077112f5d50d70901963e4b391c7f2ec40dfc862011c808",
+    "RUN08-benchmark-2.json": "7bb5c364ce299653a6e186bdede4842ef2931230a5284d649abecc791c0eb877"
+  },
+  "secure_boot": 1,
+  "windows_secure_boot_from_collector": true,
+  "windows_boot_utc_from_collector": "2026-10-25T22:14:22.5000000Z",
+  "same_boot_independently_verified": false,
+  "initial_selectors": [
+    0,
+    0
+  ],
+  "non_selector_registers_matched": 19,
+  "firmware_started": false,
+  "prom_verified": false,
+  "result": "rejected at initial profile; entry PCI configuration restored",
+  "performance_status": "STOCK_PERFORMANCE_LIKELY"
+}

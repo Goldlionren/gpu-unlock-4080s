@@ -17,3 +17,4 @@ evidence/disk-boot-stage3-0.2.0-run00/** -text
 evidence/secureboot-stage3-0.2.0-run03/** -text
 evidence/cold-profile-stage3-0.2.0/** -text
 evidence/ss0-workaround/** -text
+evidence/selector-state-run08/** -text

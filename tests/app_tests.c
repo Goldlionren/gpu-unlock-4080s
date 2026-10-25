@@ -27,7 +27,7 @@ static unsigned Checks,Mode,ConfigReads,MemWrites,Reserves,Releases,Restores,Cor
 static unsigned Starts,Loads,Unloads,KeyCalls,IoCloses,AssetsReleased,HashCalls,PromCopies,Stalls,Containments;
 static unsigned WorkingClears,StopContainments;
 static unsigned FinalReads;
-static unsigned ColdSs0Reads;
+static unsigned ColdSs0Reads,ColdSs1Reads;
 static BOOLEAN Held,LogOpen;
 static EFI_BOOT_SERVICES Bs;
 static EFI_RUNTIME_SERVICES Rs;
@@ -58,7 +58,9 @@ enum {SUCCESS,SECURE_ON,LOG_FAIL,WATCHDOG_FAIL,TARGET_BAD,ASSET_FAIL,NO_WINDOWS,
     RUN03_STATUS_CLEAR,STATUS_NEW_ERROR,STATUS_CONTROL_DRIFT,PREFIRMWARE_STATUS_CLEAR,STATUS_CLEAR_NO_FLR,
     INTERNAL_SAME_ESP,INTERNAL_SECURE_ON,SECURE_SETUP_MODE,SECURE_READ_FAIL,SECURE_BAD_VALUE,SETUP_READ_FAIL,
     SS0_36,SS0_37,SS0_UNSTABLE,SS0_AND_SS1_BAD,SS0_PROM_BAD,SS0_READ_FAULT,
-    SS0_UNKNOWN,SS0_POST_PROM_DRIFT,SS0_POST_PROM_FAULT,SS0_OTHER_PROFILE_BAD};
+    SS0_UNKNOWN,SS0_POST_PROM_DRIFT,SS0_POST_PROM_FAULT,SS0_OTHER_PROFILE_BAD,
+    SELECTORS_ZERO,SS0_ALL_ONES,SS0_BADF,SS1_ALL_ONES,SS1_BADF,SS1_DRIFT,SS1_POST_PROM_DRIFT,
+    ZERO_PROM_BAD,ZERO_OTHER_PROFILE_BAD};
 #define CHECK(x) do{Checks++;if(!(x)){fprintf(stderr,"app FAIL line %d mode %u: %s\n",__LINE__,Mode,#x);exit(1);}}while(0)
 
 static void Put(UINT8 *p,UINT64 value,UINTN bytes){for(UINTN i=0;i<bytes;i++)p[i]=(UINT8)(value>>(i*8));}
@@ -185,7 +187,7 @@ VOID GuCopyFromIo(VOID *dst,const VOID *src,size_t n){
     if(Mode==PROM_CFG_DRIFT&&PromCopies==1)Config[20]^=1;
     if(Mode==PREFIRMWARE_STATUS_CLEAR&&PromCopies==1)Config[32]=0x00002930;
 }
-BOOLEAN GuHashMatches(const VOID *data,UINTN n,const char *hash){CHECK(data&&(n==1048576||n==GU_PROM_VIEW_BYTES)&&strlen(hash)==64);HashCalls++;return Mode!=PROM_BAD&&Mode!=SS0_PROM_BAD;}
+BOOLEAN GuHashMatches(const VOID *data,UINTN n,const char *hash){CHECK(data&&(n==1048576||n==GU_PROM_VIEW_BYTES)&&strlen(hash)==64);HashCalls++;return Mode!=PROM_BAD&&Mode!=SS0_PROM_BAD&&Mode!=ZERO_PROM_BAD;}
 UINT32 GuRead32(UINT32 offset){
     static const UINT32 offsets[]={0,0x1fa828,0x1fa824,0x118128,0x118234,0x110100,0x1fa7cc,0x1fa7c4,0x9a0148,0x823804,0x823814,0x823818,0x82381c,0x823820,0x1183a4,0x625f04,0x1fa7c8,0x1fa82c,0x1fa830,0x824148,0x8241e0};
     static const UINT32 values[]={0x193000a1,0,0x1ffffe00,0x8b8f,0x3ff,0x10,0x4cb8f,0x4cb8f,0xffffff0f,0xffffff8f,0x233,0x410080,0x64113035,2,0x3ff8,1,0x45cb8f,0x100000,0x3cf7ff0,1,1};
@@ -193,6 +195,9 @@ UINT32 GuRead32(UINT32 offset){
     if(CoreCalls){if(offset==0x82381c)return Mode==SELECTOR_BAD?0x64113035:0x88888888;if(offset==0x823820)return 8;if(offset==0x1fa828)return 0;if(offset==0x110100)return 0x10;CHECK(0);}
     if(offset==0x82381c) {
         ColdSs0Reads++;
+        if(Mode==SELECTORS_ZERO||Mode==ZERO_PROM_BAD||Mode==ZERO_OTHER_PROFILE_BAD)return 0;
+        if(Mode==SS0_ALL_ONES)return 0xffffffff;
+        if(Mode==SS0_BADF)return 0xbadf5620;
         if(Mode==SS0_POST_PROM_FAULT&&ColdSs0Reads==3){Gu.fault=TRUE;return 0xffffffff;}
         if(Mode==SS0_POST_PROM_DRIFT)return ColdSs0Reads==3?0x64113037:0x64113036;
         if(Mode==SS0_UNKNOWN)return 0x64113038;
@@ -201,8 +206,16 @@ UINT32 GuRead32(UINT32 offset){
         if(Mode==SS0_37)return 0x64113037;
         if(Mode==SS0_36||Mode==SS0_AND_SS1_BAD||Mode==SS0_PROM_BAD||Mode==SS0_READ_FAULT||Mode==SS0_POST_PROM_FAULT||Mode==SS0_OTHER_PROFILE_BAD)return 0x64113036;
     }
-    if(offset==0x823820&&Mode==SS0_AND_SS1_BAD)return 3;
-    if(offset==0x1183a4&&Mode==SS0_OTHER_PROFILE_BAD)return 0x3ff9;
+    if(offset==0x823820) {
+        ColdSs1Reads++;
+        if(Mode==SELECTORS_ZERO||Mode==ZERO_PROM_BAD||Mode==ZERO_OTHER_PROFILE_BAD)return 0;
+        if(Mode==SS0_AND_SS1_BAD)return 3;
+        if(Mode==SS1_ALL_ONES)return 0xffffffff;
+        if(Mode==SS1_BADF)return 0xbadf0000;
+        if(Mode==SS1_DRIFT)return ColdSs1Reads==1?2:0;
+        if(Mode==SS1_POST_PROM_DRIFT)return ColdSs1Reads==3?0:2;
+    }
+    if(offset==0x1183a4&&(Mode==SS0_OTHER_PROFILE_BAD||Mode==ZERO_OTHER_PROFILE_BAD))return 0x3ff9;
     for(UINTN i=0;i<ARRAY_SIZE(offsets);i++)if(offsets[i]==offset)return Mode==PROFILE_FAIL&&i==0?0:values[i];
     CHECK(0);return 0xffffffff;
 }
@@ -250,7 +263,7 @@ static void Setup(unsigned mode){
     while(AllocCount)free(Allocations[--AllocCount]);
     memset(&Bs,0,sizeof(Bs));memset(&Rs,0,sizeof(Rs));memset(&St,0,sizeof(St));memset(&Pci,0,sizeof(Pci));
     memset(Config,0,sizeof(Config));memset(&Outcome,0,sizeof(Outcome));memset(LastConsole,0,sizeof(LastConsole));
-    memset(LogCapture,0,sizeof(LogCapture));LogLength=0;WorkingClears=StopContainments=FinalReads=ColdSs0Reads=0;
+    memset(LogCapture,0,sizeof(LogCapture));LogLength=0;WorkingClears=StopContainments=FinalReads=ColdSs0Reads=ColdSs1Reads=0;
     Config[0]=GU_BOARD_ID;Config[1]=0x00100000;Config[2]=0x030000a1;Config[4]=0x83000000;
     Config[5]=0xc;Config[6]=0x60;Config[7]=0xc;Config[8]=0x64;Config[9]=0x3001;
     Config[11]=GU_BOARD_SUBSYSTEM;Config[12]=0x84000000;Config[32]=0x00092930;memcpy(Initial,Config,sizeof(Config));
@@ -296,18 +309,18 @@ static void FinalPolicyTests(void){
 }
 int main(void){
     unsigned mode;
-    for(UINT32 low=0;low<256;low++)CHECK(ColdSs0Allowed(0x64113000|low)==(low==0x35||low==0x36||low==0x37));
-    for(UINT32 base=0x64113035;base<=0x64113037;base++)
-        for(unsigned bit=8;bit<32;bit++)CHECK(!ColdSs0Allowed(base^(1u<<bit)));
-    CHECK(!ColdSs0Allowed(0)&&!ColdSs0Allowed(0xffffffff)&&!ColdSs0Allowed(0x88888888));
-    for(mode=SUCCESS;mode<=SS0_OTHER_PROFILE_BAD;mode++){
-        BOOLEAN success=(BOOLEAN)(mode==SUCCESS||mode==RUN03_STATUS_CLEAR||mode==SECURE_ON||mode==INTERNAL_SAME_ESP||mode==INTERNAL_SECURE_ON||mode==SS0_36||mode==SS0_37);
+    for(UINT32 low=0;low<65536;low++)CHECK(!ColdSelectorReadable(0xbadf0000u|low));
+    CHECK(!ColdSelectorReadable(0xffffffff));
+    CHECK(ColdSelectorReadable(0)&&ColdSelectorReadable(2)&&ColdSelectorReadable(0x64113038)&&ColdSelectorReadable(0x88888888));
+    for(mode=SUCCESS;mode<=ZERO_OTHER_PROFILE_BAD;mode++){
+        BOOLEAN success=(BOOLEAN)(mode==SUCCESS||mode==RUN03_STATUS_CLEAR||mode==SECURE_ON||mode==INTERNAL_SAME_ESP||mode==INTERNAL_SECURE_ON||mode==SS0_36||mode==SS0_37||mode==SS0_UNKNOWN||mode==SS0_AND_SS1_BAD||mode==SELECTORS_ZERO);
         EFI_STATUS result=EFI_SUCCESS;Setup(mode);
         if(setjmp(Handoff)==0){result=EfiMain(Img,&St);CHECK(!success);}
         else CHECK(success&&Starts==1&&strcmp(Phase,"windows-start")==0&&!Gu.retained);
         if(success){
             CHECK(Restores==1&&Releases==1&&CoreCalls==1&&HashCalls==2&&PromCopies==2&&WorkingClears==1&&StopContainments==0);
-            if(mode==SS0_36||mode==SS0_37)CHECK(ColdSs0Reads==3&&strstr(LogCapture,"observed_variant=1 PROM_verified=1")!=NULL);
+            if(mode==SS0_36||mode==SS0_37||mode==SS0_UNKNOWN||mode==SS0_AND_SS1_BAD||mode==SELECTORS_ZERO)
+                CHECK(ColdSs0Reads==3&&ColdSs1Reads==3&&strstr(LogCapture,"differs_from_reference=1 PROM_verified=1")!=NULL);
             if(mode!=RUN03_STATUS_CLEAR)CHECK(strstr(LogCapture,"command_status=0 config_read_status=0 compared=1 differences=0")!=NULL);
             else {
                 CHECK(strstr(LogCapture,"entry config delta: offset=0x80 entry=0x92930 final=0x2930 xor=0x90000")!=NULL);
@@ -322,11 +335,13 @@ int main(void){
             CHECK(CoreLoads==0&&CoreCalls==0&&Starts==0&&!Gu.started);
             CHECK(Restores==1&&Releases==1&&!Held&&!memcmp(Config,Initial,sizeof(Config)));
             CHECK(strstr(LogCapture,"cold reg=0x8241e0 actual=0x1 expected=0x1")!=NULL);
-            if(mode==SS0_UNSTABLE||mode==SS0_UNKNOWN||mode==SS0_POST_PROM_DRIFT||mode==SS0_POST_PROM_FAULT) {
+            if(mode==SS0_POST_PROM_DRIFT||mode==SS0_POST_PROM_FAULT||mode==SS1_POST_PROM_DRIFT) {
                 CHECK(result==EFI_NOT_READY&&PromCopies==2&&HashCalls==2);
             }
-            if(mode==SS0_AND_SS1_BAD||mode==SS0_READ_FAULT||mode==SS0_OTHER_PROFILE_BAD)CHECK(PromCopies==0&&HashCalls==0);
-            if(mode==SS0_PROM_BAD)CHECK(result==EFI_CRC_ERROR&&PromCopies==2);
+            if(mode==SS0_UNSTABLE||mode==SS0_READ_FAULT||mode==SS0_OTHER_PROFILE_BAD||mode==ZERO_OTHER_PROFILE_BAD||
+               mode==SS0_ALL_ONES||mode==SS0_BADF||mode==SS1_ALL_ONES||mode==SS1_BADF||mode==SS1_DRIFT)
+                CHECK(result==EFI_NOT_READY&&PromCopies==0&&HashCalls==0);
+            if(mode==SS0_PROM_BAD||mode==ZERO_PROM_BAD)CHECK(result==EFI_CRC_ERROR&&PromCopies==2);
         }
         if(mode<=ADMISSION_FAIL){CHECK(MemWrites==0&&CoreCalls==0&&Starts==0&&Restores==0);}
         if(mode==ADMISSION_PARTIAL)CHECK(MemWrites==0&&Releases==1&&!Held&&CoreCalls==0);

@@ -93,28 +93,29 @@ static EFI_STATUS EnableMemory(VOID) {
     cfg[1]&=0xffff0000u;if(memcmp(cfg,EntryConfig,sizeof(cfg)))return EFI_DEVICE_ERROR;
     return ConfigCheck(2);
 }
-/* This board has reported all three initial SS0 values. Only the initial
- * admission policy varies; the fixed unlock target and recovery gates do not.
- * These observations alone are not hardware validation of the new paths. */
-static BOOLEAN ColdSs0Allowed(UINT32 value) {
-    return (BOOLEAN)(value==0x64113035||value==0x64113036||value==0x64113037);
+/* Initial speed selectors are state, not board identity. Use the core's
+ * inaccessible-value convention and require stable reads. Fixed board/PROM
+ * identity, non-selector cold state and final unlock targets remain strict. */
+static BOOLEAN ColdSelectorReadable(UINT32 value) {
+    return (BOOLEAN)(value!=0xffffffff&&(value&0xffff0000u)!=0xbadf0000u);
 }
 static EFI_STATUS ColdAndProm(VOID) {
     static const UINT32 offsets[]={0,0x1fa828,0x1fa824,0x118128,0x118234,0x110100,0x1fa7cc,0x1fa7c4,
         0x9a0148,0x823804,0x823814,0x823818,0x82381c,0x823820,0x1183a4,0x625f04,0x1fa7c8,0x1fa82c,0x1fa830,0x824148,0x8241e0};
     static const UINT32 values[]={0x193000a1,0,0x1ffffe00,0x8b8f,0x3ff,0x10,0x4cb8f,0x4cb8f,
         0xffffff0f,0xffffff8f,0x233,0x410080,0x64113035,2,0x3ff8,1,0x45cb8f,0x100000,0x3cf7ff0,1,1};
-    BOOLEAN profileGood=TRUE,otherMismatch=FALSE;UINT32 firstSs0=0,firstSs1=0;
-    GuLogText("cold diagnostics revision=2; initial SS0 allowlist=0x64113035,0x64113036,0x64113037; other admission and unlock targets unchanged\n");
+    BOOLEAN otherMismatch=FALSE;UINT32 firstSs0=0,firstSs1=0;
+    GuLogText("cold diagnostics revision=3; initial SS0/SS1 require readable stable values, not fixed reset values; board/PROM and unlock targets unchanged\n");
     for(UINTN i=0;i<ARRAY_SIZE(offsets);i++) {
         UINT32 value=GuRead32(offsets[i]);
-        GuLog("cold reg=%#x actual=%#x expected=%#x\n",offsets[i],value,values[i]);
+        BOOLEAN selector=(BOOLEAN)(offsets[i]==0x82381c||offsets[i]==0x823820);
+        if(selector)GuLog("cold selector reg=%#x actual=%#x historical_reference=%#x readable=%u\n",offsets[i],value,values[i],ColdSelectorReadable(value));
+        else GuLog("cold reg=%#x actual=%#x expected=%#x\n",offsets[i],value,values[i]);
         if(Gu.fault)return EFI_NOT_READY;
         if(offsets[i]==0x82381c)firstSs0=value;
         if(offsets[i]==0x823820)firstSs1=value;
-        if(value!=values[i]) {
-            if(offsets[i]!=0x82381c||!ColdSs0Allowed(value))profileGood=FALSE;
-            if(offsets[i]!=0x82381c)otherMismatch=TRUE;
+        if(!selector&&value!=values[i]) {
+            otherMismatch=TRUE;
             if(i==0)return EFI_NOT_READY; /* Never probe further on a chip identity mismatch. */
         }
     }
@@ -122,9 +123,12 @@ static EFI_STATUS ColdAndProm(VOID) {
     GuLog("cold selectors repeat: SS0 first=%#x second=%#x SS1 first=%#x second=%#x stable=%u\n",
         firstSs0,secondSs0,firstSs1,secondSs1,firstSs0==secondSs0&&firstSs1==secondSs1);
     if(Gu.fault)return EFI_NOT_READY;
-    if(!ColdSs0Allowed(secondSs0)||firstSs0!=secondSs0)profileGood=FALSE;
-    if(secondSs1!=2||firstSs1!=secondSs1){profileGood=FALSE;otherMismatch=TRUE;}
-    if(otherMismatch){GuLogText("cold profile rejected: non-SS0 mismatch; PROM not read; firmware not started\n");return EFI_NOT_READY;}
+    if(otherMismatch){GuLogText("cold profile rejected: non-selector mismatch; PROM not read; firmware not started\n");return EFI_NOT_READY;}
+    if(!ColdSelectorReadable(firstSs0)||!ColdSelectorReadable(firstSs1)||
+       !ColdSelectorReadable(secondSs0)||!ColdSelectorReadable(secondSs1)||
+       firstSs0!=secondSs0||firstSs1!=secondSs1) {
+        GuLogText("cold profile rejected: selectors unreadable or unstable; PROM not read; firmware not started\n");return EFI_NOT_READY;
+    }
     UINT8 *a=GuAlloc(1048576),*b=GuAlloc(1048576);BOOLEAN good=FALSE;
     if(a&&b) {
         GuCopyFromIo(a,(VOID*)(UINTN)(Gu.bar_base+GU_PROM_BAR_OFFSET),1048576);
@@ -135,12 +139,12 @@ static EFI_STATUS ColdAndProm(VOID) {
     GuFree(a);GuFree(b);GuLog("PROM double-read and exact board hash matched=%u\n",good);
     if(!good||Gu.fault)return EFI_CRC_ERROR;
     UINT32 finalSs0=GuRead32(0x82381c),finalSs1=GuRead32(0x823820);
-    GuLog("cold selectors post-PROM: SS0=%#x SS1=%#x stable=%u allowed=%u\n",finalSs0,finalSs1,
-        finalSs0==firstSs0&&finalSs1==firstSs1,ColdSs0Allowed(finalSs0)&&finalSs1==2);
-    if(Gu.fault||finalSs0!=firstSs0||!ColdSs0Allowed(finalSs0)||finalSs1!=firstSs1||finalSs1!=2)return EFI_NOT_READY;
-    if(!profileGood){GuLogText("cold profile rejected: SS0 mismatch; remaining profile and PROM verified; firmware not started\n");return EFI_NOT_READY;}
-    GuLog("cold profile accepted: initial_SS0=%#x initial_SS1=%#x observed_variant=%u PROM_verified=1\n",
-        firstSs0,firstSs1,firstSs0!=0x64113035);
+    GuLog("cold selectors post-PROM: SS0=%#x SS1=%#x stable=%u readable=%u\n",finalSs0,finalSs1,
+        finalSs0==firstSs0&&finalSs1==firstSs1,ColdSelectorReadable(finalSs0)&&ColdSelectorReadable(finalSs1));
+    if(Gu.fault||finalSs0!=firstSs0||!ColdSelectorReadable(finalSs0)||
+       finalSs1!=firstSs1||!ColdSelectorReadable(finalSs1))return EFI_NOT_READY;
+    GuLog("cold profile accepted: initial_SS0=%#x initial_SS1=%#x differs_from_reference=%u PROM_verified=1\n",
+        firstSs0,firstSs1,firstSs0!=0x64113035||firstSs1!=2);
     return EFI_SUCCESS;
 }
 static EFI_STATUS PreloadWindows(VOID) {
