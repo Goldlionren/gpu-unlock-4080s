@@ -1,0 +1,1 @@
+PASS: 14369 port assertions; direct command, DMA retention, FLR restore, STOP at command zero; host mocks only.

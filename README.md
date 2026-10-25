@@ -4,6 +4,8 @@
 
 使用本机证书签署 EFI，并在固件 db 登记该证书；这是本机自定义信任实测，不是微软通用签名。每次仍需按 U 执行事务。步骤见 [硬盘启动说明](DISK-BOOT-SECUREBOOT.zh-CN.md) 和 [签名、登记与 Secure Boot 实测](SECUREBOOT-SIGNING.zh-CN.md)。**本次未重新测量性能，下面的数据仍属于 Secure Boot 关闭时的 0.1.2。**
 
+**后续问题（08:23）：RUN04/RUN05 的初始 SS0 为 `0x64113036`，断电复测 RUN06 为 `0x64113037`，均不符合固定初值 `0x64113035`，因此在固件事务开始前拒绝。** RUN03 的一次成功不代表重复启动已稳定。当前源码增加完整初始状态诊断，仍拒绝这些初值，没有将新状态视为兼容；详见 [失败记录与诊断改动](evidence/cold-profile-stage3-0.2.0/FINDINGS.zh-CN.md)。
+
 Windows 11 Pro 上的真实实机适配与测量。性能归档版本 **stage3-0.1.2**，硬盘与 Secure Boot 实测版本 **stage3-0.2.0-disk-candidate**：在 Windows 启动前运行自定义 UEFI 程序，核对 SS0/SS1 写入及 FLR 后读回，恢复设备后进入原 Windows。
 
 **这是单块已测板卡的实验代码，不是通用 RTX 40 系列工具。** 入口固定为 AD103、`10de:2702 / 19da:4702`、16GB、特定 BAR/ROM 哈希与 Intel GOP 拓扑。不刷写 VBIOS、不替换 NVIDIA Windows 驱动。其他板卡应被检查拒绝，不能靠删除检查获得兼容性。

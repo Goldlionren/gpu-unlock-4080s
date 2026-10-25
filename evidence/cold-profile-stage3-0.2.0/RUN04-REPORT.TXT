@@ -1,0 +1,34 @@
+RTX4080 SUPER 16GB / Windows UEFI experimental unlock stage3-0.2.0-disk-candidate
+RUN04
+Intel GOP retained. One explicit U starts one firmware transaction. Selector mismatch is FAILURE; Windows handoff requires strict recovery and selector readback. This revision has not been hardware tested; Windows handoff and performance remain unvalidated.
+PIO readback is not an execution gate. This path does not independently verify TCM contents; FWSEC scratch/WPR results are required.
+build_id=a779b1312b1c25f2daba214af72e14c9540470a67151b3624a87b080288a969b CAP_STAGE2_0002=4c65ad8928ef717eccd4cc59b32b4e0a6a69a85bb143a55055cb2818b59f67ea
+boot policy: secure_boot=1 internal_volume=1 firmware_authentication_not_overridden=1
+asset verified: gpu-unlock/610.43.03/booter_load_ad102.bin bytes=57672 sha256=6ee05b20e1dc244c08c052f36ef28469b8d09f4955d1fe33e48a179e11a7fd49
+asset verified: gpu-unlock/610.43.03/v67-ad102-610.43.03-four-plm.bin bytes=64000 sha256=44c36b2d6b3424e53e18f3e55db85c833655de071ce66ce42749588a4a7dc8cb
+asset verified: gpu-unlock/610.43.03/gsp_ga10x.bin bytes=84277400 sha256=572373620a37418f24dc16b5031c39338778c3257e48e8408de9a57291b24f3a
+asset verified: gpu-unlock/610.43.03/gsp_boot_ad102.bin bytes=36864 sha256=45d6335a8185d6ff13e8d1484cea73f68d3d13aa1c19dc080ed1c3482dd5bac0
+asset verified: gpu-unlock/610.43.03/gsp_boot_desc_ad102.bin bytes=84 sha256=83f8f3f1f5f9496e0ea8fc7103c2beb64d0b6de2f5ffe725f13514de5a95fa42
+Windows boot manager preload: one internal candidate, status=0
+READY: press U within 30 seconds for ONE experimental firmware transaction. ESC cancels.
+No VBIOS flashing. On STOP or hang physically power OFF; do not reset into Windows.
+admission={"reason":"admitted","status":"0x0000000000000000","by_driver_reservation_held":true}
+PCI MEM intent: endpoint command Uint16 0->2; Attributes cache remains 0.
+cold reg=0 actual=0x193000a1 expected=0x193000a1
+cold reg=0x1fa828 actual=0 expected=0
+cold reg=0x1fa824 actual=0x1ffffe00 expected=0x1ffffe00
+cold reg=0x118128 actual=0x8b8f expected=0x8b8f
+cold reg=0x118234 actual=0x3ff expected=0x3ff
+cold reg=0x110100 actual=0x10 expected=0x10
+cold reg=0x1fa7cc actual=0x4cb8f expected=0x4cb8f
+cold reg=0x1fa7c4 actual=0x4cb8f expected=0x4cb8f
+cold reg=0x9a0148 actual=0xffffff0f expected=0xffffff0f
+cold reg=0x823804 actual=0xffffff8f expected=0xffffff8f
+cold reg=0x823814 actual=0x233 expected=0x233
+cold reg=0x823818 actual=0x410080 expected=0x410080
+cold reg=0x82381c actual=0x64113036 expected=0x64113035
+entry command restore detail: step=complete api_status=0 id=0x270210de before=0x2 after=0 attributes=0
+entry restore check: command_status=0 config_read_status=0 compared=1 differences=0 fault=0 retained=0
+entry status policy: verified_flr=0 accepted_ced_urd_clear=0 configuration_accepted=1
+release={"bridge_status":"0x0000000000000000","owners_status":"0x0000000000000000","display_status":"0x0000000000000000","close_status":"0x0000000000000000","reservation_released":true}
+FINAL status=0x8000000000000006 phase=cold-prom-profile attempted=0 firmware_started=0 restored_entry_command=0 performance_validated=0
