@@ -1,8 +1,12 @@
 # 本机签名与 Secure Boot 登记
 
-2026-10-26 状态：已在 Admin 账户生成 RSA-2048 / SHA-256 本机签名证书，私钥以不可导出方式保存在 CurrentUser\My。已签署实测 0.2.0 EFI，并安装到原 ESP 的 `\EFI\GPUUnlock\GPUUnlock.efi`。尚未登记固件信任，Secure Boot 仍关闭；没有开启后的成功报告。
+2026-10-26 00:59 状态：**本机 Secure Boot 开启后的硬盘 EFI 启动、GPU 事务与返回 Windows 已实测成功。** 已在 Admin 账户生成 RSA-2048 / SHA-256 本机签名证书，私钥以不可导出方式保存在 CurrentUser\My。已签署实测 0.2.0 EFI，安装到原 ESP 的 `\EFI\GPUUnlock\GPUUnlock.efi`，并完成固件信任登记。证据见 [RUN03 报告与验收说明](evidence/secureboot-stage3-0.2.0-run03/README.md)。不需要再次登记密钥。
 
-00:43 更新：用户完成 BIOS Custom / Reset to Setup Mode 并执行登记后，已独立重新读取固件。原 PK、KEK、dbx 与最新备份逐字节一致，db 与“原库加一张本机签名证书”逐字节一致。**密钥内容已登记并核验，但 SetupMode 仍为 1、SecureBoot 为 0，状态为 KEYS_VERIFIED_MODE_PENDING。** 尚不能宣布 User Mode 或 Secure Boot 开启成功，也未证明原因必然是延迟生效；下一步保持关闭并重启后只读复核。
+00:43 历史状态：用户完成 BIOS Custom / Reset to Setup Mode 并执行登记后，已独立重新读取固件。原 PK、KEK、dbx 与最新备份逐字节一致，db 与“原库加一张本机签名证书”逐字节一致。当时 SetupMode 仍为 1、SecureBoot 为 0，状态为 KEYS_VERIFIED_MODE_PENDING，因此先保持关闭并重启后只读复核。
+
+00:49 历史状态：重启后的只读检查确认四库全部精确匹配、SetupMode=0、SecureBoot=0，状态为 `KEYS_VERIFIED_USER_MODE_SECURE_BOOT_OFF`，模式待确认的问题解决。随后用户在 BIOS 保留 Custom Mode 和现有密钥，开启 Secure Boot，启动 GPUUnlock 并按 U。
+
+00:58–00:59 验收：Windows `Confirm-SecureBootUEFI=True`；只读检查为 `SECURE_BOOT_ENABLED_KEYS_VERIFIED`、SetupMode=0、SecureBoot=1、四库全部匹配；RUN03 记录 `secure_boot=1 internal_volume=1 firmware_authentication_not_overridden=1`。GPU 事务 result=0、required_plm=1、FLR 前后 SS0/SS1 匹配、recovered=1、retained=0、maps=0、最终 status=0。all_plm=0 仍是已知非致命 FBPA 不匹配。用户确认本次进入 Windows，采集器记录 Windows 启动 UTC 为 2026-10-25T13:57:05.5000000Z（悉尼 00:57:05.5）。该关联由报告、采集上下文和用户操作确认共同支持，不是独立的启动证明或远程证明。
 
 | 项目 | 实际值 |
 |---|---|
@@ -10,7 +14,8 @@
 | 原 EFI SHA256 | `cd506a77b942009e55daad312aa6bfdcbcfabfedfcd851e09466317aecd32513` |
 | 签名 EFI SHA256 | `32d3e756af38f66a1a5b1f68790d4058aed93164dac39f0af4562e71bf8af128` |
 | Authenticode 映像 SHA256 | `8ae951c67c657c5c0f7527a660204a99496978e541cc126f05786c2b55c2d723` |
-| 固件预检查 | `WAITING_FOR_FIRMWARE_SETUP_MODE`，没有写入密钥 |
+| 最新固件检查 | `SECURE_BOOT_ENABLED_KEYS_VERIFIED`，四库匹配、SetupMode=0、SecureBoot=1 |
+| Secure Boot 实测报告 SHA256 | `bd2474d7144579ca71a07f74d776b2a2f53c9eb29700724a8948d44ba9361d78` |
 
 私钥不在仓库中，也没有导出 PFX。签名副本、公开证书、最新信任库备份和登记计划位于：
 
@@ -40,18 +45,18 @@ F:\AI\gpu-unlock-4080s\LOCAL-secureboot\20261026-002446-de1ebf01\
 
 Windows `Get-AuthenticodeSignature` 返回 UnknownError，具体消息是证书链终止于未被 Windows 信任的根。这不等于上述密码学检查失败。脚本没有把私有签名证书导入 Windows Root；Windows 根库和固件 db 是两回事。**签名校验通过仍不等于固件信任或 Secure Boot 开启后执行成功。**
 
-## 现在需要的 BIOS 操作
+## 首次登记的 BIOS 操作（本机已完成，不要重复）
 
-当前 PK 仍是 Intel SBoot1、SetupMode=0。按 [UEFI 规范](https://uefi.org/specs/UEFI/2.10/32_Secure_Boot_and_Driver_Signing.html)，User Mode 的 db 更新需要已有 PK/KEK 授权，新生成的代码签名私钥没有该授权。[ASUS NUC 官方流程](https://zentalk.asus.com/t5/faq/nuc-how-to-enroll-the-custom-secure-boot-key/ta-p/466140) 指向 Custom Mode、Reset to Setup Mode，然后回 Windows 登记。不能靠 Windows 管理员权限代替固件授权。
+首次登记前 PK 是 Intel SBoot1、SetupMode=0。按 [UEFI 规范](https://uefi.org/specs/UEFI/2.10/32_Secure_Boot_and_Driver_Signing.html)，User Mode 的 db 更新需要已有 PK/KEK 授权，新生成的代码签名私钥没有该授权。[ASUS NUC 官方流程](https://zentalk.asus.com/t5/faq/nuc-how-to-enroll-the-custom-secure-boot-key/ta-p/466140) 指向 Custom Mode、Reset to Setup Mode，然后回 Windows 登记。不能靠 Windows 管理员权限代替固件授权。
 
 1. 保存工作，进入 BIOS，继续保持 Secure Boot **Disabled**。
 2. Secure Boot Mode 选 **Custom Mode**。
 3. 选择 **Reset to Setup Mode**。这一步会暂时清除平台 PK，使固件允许登记；本流程随后恢复原 Intel PK，不创建自己的 PK。
 4. 保存退出，通过原 **Windows Boot Manager** 回到 Windows，运行下面的登记脚本。
 
-不要选择 Restore Factory Keys：本机当前 db 含默认库没有的两张 2023 CA，dbx 比默认库多 124 条记录。若没有上述菜单、或提示删除全部密钥，先保留设置并报告菜单原文，不能假设不同操作等价。此说明基于官方 NUC 流程，本机具体菜单行为尚待用户实际确认。
+不要选择 Restore Factory Keys：本机原 db 含默认库没有的两张 2023 CA，dbx 比默认库多 124 条记录。本机这次 Reset 后登记脚本实际恢复了 dbx、KEK、完整原 db 加新证书，再恢复原 PK，均已逐字节核验。其他机器若菜单不同，仍须先核对具体行为，不能假设不同操作等价。
 
-## Windows 登记命令
+## 首次 Windows 登记命令（本机已完成）
 
 管理员 PowerShell：
 
@@ -66,7 +71,7 @@ cd F:\AI\gpu-unlock-4080s
 
 1. dbx、KEK 若保持原样则不写；若已为空则恢复最新备份原值。出现非空且与备份不同的内容时停止，避免覆盖新更新。
 2. db 保留原值并追加一张证书；若已为空，写入完整原 db 加新证书。已符合预期时跳过。
-3. 对上述三项逐字节核验后，最后恢复原 Intel PK；再确认 SetupMode=0。
+3. 对上述三项逐字节核验后，最后恢复原 Intel PK；再次核对四库及 SetupMode，尚未读到 User Mode 时返回模式待确认。
 
 每次写入前再次读取，防止忽略并发变化。每次写入后立即核对；失败时停止，不以删除所有密钥作为自动回退。逻辑经过 10 个模拟场景、34 项检查，包括保留旧库、空库恢复、部分完成后继续、错误模式、内容变化、写入失败和回读不符。**这些不是本机固件写入的成功证明。**
 
@@ -88,4 +93,16 @@ F:\AI\gpu-unlock-4080s\Check-SecureBootEnrollment.ps1
 
 ## 最后一次验证
 
-开启后的验收需要同时满足：Windows `Confirm-SecureBootUEFI` 为 True、SetupMode=0、固件信任库符合预期；新 GPUUnlock 报告记录 `secure_boot=1 internal_volume=1`，GPU 事务/FLR/选择器/恢复均成功，并实际返回 Windows。之后再重新测量性能。当前尚未完成这一阶段。
+开启后的验收需要同时满足：Windows `Confirm-SecureBootUEFI` 为 True、SetupMode=0、固件信任库符合预期；新 GPUUnlock 报告记录 `secure_boot=1 internal_volume=1`，GPU 事务/FLR/选择器/恢复均成功，并实际返回 Windows。**本机 RUN03 已满足上述验收；尚未重新测量 Secure Boot 开启时的性能，也未进行固件拒绝篡改/未信任 EFI 的负向启动测试。** 历史 FP32/Tensor 数据仍属于 0.1.2、Secure Boot 关闭的测量。
+
+在管理员 PowerShell 执行以下命令，保留两份脚本输出的路径：
+
+```powershell
+Confirm-SecureBootUEFI
+& F:\AI\gpu-unlock-4080s\Check-SecureBootEnrollment.ps1
+& F:\AI\gpu-unlock-4080s\Collect-InternalEfiReport.ps1
+```
+
+采集器会复制历史报告；最高 RUN 编号本身不是本次启动成功的证明，需要核对新报告内容。如果出现 Security Violation 或 GPUUnlock 未出现，先记录提示原文，关闭 Secure Boot 后通过 Windows Boot Manager 回到系统；保留现有密钥。
+
+`Check-SecureBootEnrollment.ps1` 的 `secure_boot_efi_execution_verified=false` 表示该工具只验证密钥和模式，不读取 EFI 执行报告，并非本次事务失败。原始检查结果、原构建 manifest、签名时 manifest 和报告头部的构建时未实测文字均保持原样；后续成功结论单独写在 RUN03 验收记录中。

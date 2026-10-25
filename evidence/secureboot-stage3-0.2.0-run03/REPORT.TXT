@@ -1,0 +1,287 @@
+RTX4080 SUPER 16GB / Windows UEFI experimental unlock stage3-0.2.0-disk-candidate
+RUN03
+Intel GOP retained. One explicit U starts one firmware transaction. Selector mismatch is FAILURE; Windows handoff requires strict recovery and selector readback. This revision has not been hardware tested; Windows handoff and performance remain unvalidated.
+PIO readback is not an execution gate. This path does not independently verify TCM contents; FWSEC scratch/WPR results are required.
+build_id=a779b1312b1c25f2daba214af72e14c9540470a67151b3624a87b080288a969b CAP_STAGE2_0002=4c65ad8928ef717eccd4cc59b32b4e0a6a69a85bb143a55055cb2818b59f67ea
+boot policy: secure_boot=1 internal_volume=1 firmware_authentication_not_overridden=1
+asset verified: gpu-unlock/610.43.03/booter_load_ad102.bin bytes=57672 sha256=6ee05b20e1dc244c08c052f36ef28469b8d09f4955d1fe33e48a179e11a7fd49
+asset verified: gpu-unlock/610.43.03/v67-ad102-610.43.03-four-plm.bin bytes=64000 sha256=44c36b2d6b3424e53e18f3e55db85c833655de071ce66ce42749588a4a7dc8cb
+asset verified: gpu-unlock/610.43.03/gsp_ga10x.bin bytes=84277400 sha256=572373620a37418f24dc16b5031c39338778c3257e48e8408de9a57291b24f3a
+asset verified: gpu-unlock/610.43.03/gsp_boot_ad102.bin bytes=36864 sha256=45d6335a8185d6ff13e8d1484cea73f68d3d13aa1c19dc080ed1c3482dd5bac0
+asset verified: gpu-unlock/610.43.03/gsp_boot_desc_ad102.bin bytes=84 sha256=83f8f3f1f5f9496e0ea8fc7103c2beb64d0b6de2f5ffe725f13514de5a95fa42
+Windows boot manager preload: one internal candidate, status=0
+READY: press U within 30 seconds for ONE experimental firmware transaction. ESC cancels.
+No VBIOS flashing. On STOP or hang physically power OFF; do not reset into Windows.
+admission={"reason":"admitted","status":"0x0000000000000000","by_driver_reservation_held":true}
+PCI MEM intent: endpoint command Uint16 0->2; Attributes cache remains 0.
+cold reg=0 actual=0x193000a1 expected=0x193000a1
+cold reg=0x1fa828 actual=0 expected=0
+cold reg=0x1fa824 actual=0x1ffffe00 expected=0x1ffffe00
+cold reg=0x118128 actual=0x8b8f expected=0x8b8f
+cold reg=0x118234 actual=0x3ff expected=0x3ff
+cold reg=0x110100 actual=0x10 expected=0x10
+cold reg=0x1fa7cc actual=0x4cb8f expected=0x4cb8f
+cold reg=0x1fa7c4 actual=0x4cb8f expected=0x4cb8f
+cold reg=0x9a0148 actual=0xffffff0f expected=0xffffff0f
+cold reg=0x823804 actual=0xffffff8f expected=0xffffff8f
+cold reg=0x823814 actual=0x233 expected=0x233
+cold reg=0x823818 actual=0x410080 expected=0x410080
+cold reg=0x82381c actual=0x64113035 expected=0x64113035
+cold reg=0x823820 actual=0x2 expected=0x2
+cold reg=0x1183a4 actual=0x3ff8 expected=0x3ff8
+cold reg=0x625f04 actual=0x1 expected=0x1
+cold reg=0x1fa7c8 actual=0x45cb8f expected=0x45cb8f
+cold reg=0x1fa82c actual=0x100000 expected=0x100000
+cold reg=0x1fa830 actual=0x3cf7ff0 expected=0x3cf7ff0
+cold reg=0x824148 actual=0x1 expected=0x1
+cold reg=0x8241e0 actual=0x1 expected=0x1
+PROM double-read and exact board hash matched=1
+ARMED: one FWSEC/SEC2 transaction. Intent flushed before firmware access.
+asset request: gpu-unlock/610.43.03/gsp_ga10x.bin
+asset result: gpu-unlock/610.43.03/gsp_ga10x.bin error=0 bytes=84277400
+asset cache cleanup: gpu-unlock/610.43.03/gsp_ga10x.bin devres_released=0
+driver probe resources: phase=entry empty=1
+asset request: gpu-unlock/610.43.03/v67-ad102-610.43.03-four-plm.bin
+asset result: gpu-unlock/610.43.03/v67-ad102-610.43.03-four-plm.bin error=0 bytes=64000
+asset cache cleanup: gpu-unlock/610.43.03/v67-ad102-610.43.03-four-plm.bin devres_released=0
+asset request: gpu-unlock/610.43.03/gsp_boot_ad102.bin
+asset result: gpu-unlock/610.43.03/gsp_boot_ad102.bin error=0 bytes=36864
+asset cache cleanup: gpu-unlock/610.43.03/gsp_boot_ad102.bin devres_released=0
+asset request: gpu-unlock/610.43.03/gsp_boot_desc_ad102.bin
+asset result: gpu-unlock/610.43.03/gsp_boot_desc_ad102.bin error=0 bytes=84
+asset cache cleanup: gpu-unlock/610.43.03/gsp_boot_desc_ad102.bin devres_released=0
+asset geometry: image=84226048 signature=4096 boot=36864 code=0x4800 data=0x800 manifest=0 parse=0
+asset request: gpu-unlock/610.43.03/booter_load_ad102.bin
+asset result: gpu-unlock/610.43.03/booter_load_ad102.bin error=0 bytes=57672
+asset cache cleanup: gpu-unlock/610.43.03/booter_load_ad102.bin devres_released=0
+claim: power=0 pm_cap=0x60 flags=0
+claim: command=0x2 capability=0x112c8de1 BAR_mask=0x1
+layout inputs: fb_mb=0x3ff8 vga=0x1 mmu_plm=0x45cb8f mmu_lo=0x100000 mmu_hi=0x3cf7ff0 image=84226048 boot=36864
+layout mmu: lo=0x10000000 hi=0x3cf7ff000 hi_exclusive=0x3cf800000 constrain=0
+mmu lock ignored: high address is not the FB top
+layout decoded: fb=0x3ff800000 vga=0x3ff700000 mmu_valid=0 mmu_low=0x10000000 frts=0x100000 heap=0x5800000 result=0
+layout ranges: nonwpr=0x3f4b00000 wpr=0x3f4c00000 heap=0x3f4d00000 gsp=0x3fa5a0000 boot=0x3ff5f7000 frts=0x3ff600000 end=0x3ff700000 scrub_floor=0x3ef800000
+DMA masks: streaming=0xffffffff coherent=0xffffffff requested=0xffffffff
+Booter signature: fuse_raw=0x1 version=1 signatures=2 size=768
+DMA buffers mapped: 2048
+DMA buffers mapped: 4096
+DMA buffers mapped: 6144
+DMA buffers mapped: 8192
+DMA buffers mapped: 10240
+DMA buffers mapped: 12288
+DMA buffers mapped: 14336
+DMA buffers mapped: 16384
+DMA buffers mapped: 18432
+DMA buffers mapped: 20480
+entry: plm=0xffffff8f ss0=0x64113035 ss1=0x2 wpr2_hi=0
+FWSEC: reading pinned AD103 PROM view at 0x300000
+FWSEC: PROM bytes=631296 signature=0xaa55
+gpu_unlock: ROM chain: pos=0 data=0x52494350 bytes=64512 type=0 last=0
+gpu_unlock: ROM chain: pos=0xfc00 data=0x52494350 bytes=86016 type=0x3 last=0
+gpu_unlock: ROM chain: pos=0x24c00 data=0x5344504e bytes=24576 type=0xe0 last=0
+gpu_unlock: ROM chain: pos=0x2ac00 data=0x5344504e bytes=456192 type=0xe0 last=128
+gpu_unlock: ROM expansion: base=0xfc00 ext=0x24c00 adjust=0x15000
+gpu_unlock: ROM BIT: offset=0x1b0 size=12 stride=6 tokens=19 adjust=0x15000
+gpu_unlock: ROM ucode table: offset=0x99fb6 version=1 header=6 stride=6 entries=16
+gpu_unlock: FWSEC descriptor: offset=0x4581c ROM_bytes=631296 header=0x32c0301
+gpu_unlock: FWSEC geometry: image_off=0x45b48 size=0x10500 imem=0xf700 va=0 pa=0 dmem=0xd80 pa=0 pkc=0xb24 interface=0x1c engine=0x400 ucode=9 signatures=2 versions=0x3 bytes=768
+FWSEC DMEM declared=0xd80 transfer=0xe00 image=0x10500
+gpu_unlock: FWSEC interface: offset=0x1c version=1 header=4 stride=8 entries=2 FRTS=0x3ff600000
+gpu_unlock: FWSEC mapper: version=3 size=64 cmd_offset=0xd40 cmd_size=64
+FWSEC fuse: raw=0x1 version=1
+gpu_unlock: FWSEC signature selection: versions=0x3 fuse_version=1 sig_bytes=384
+Bus Master enable intent: command=0x2 attributes=0
+Bus Master enabled: command=0x6 attributes=0 matched=1
+Falcon reset begin: base=0x110000
+poll timeout tolerated: reg=0x1100f4 last=0x47b7 mask=0x80000000 expected=0x80000000 budget_us=1000
+Falcon pre-reset timeout tolerated per HW bug 3419321
+Falcon reset done: base=0x110000 hwcfg=0x67b7 chip=0x193000a1
+Falcon DMA: base=0x110000 dest=0 offset=0 src=0x28c69000 size=0xf700 cmd=0x614
+Falcon DMA: base=0x110000 dest=0 offset=0 src=0x28c78700 size=0xe00 cmd=0x600
+FWSEC snapshot: phase=pre-start samples=21/21 error=0
+FWSEC register: reg=0x110100 value=0x10 sentinel_like=0
+FWSEC register: reg=0x110008 value=0 sentinel_like=0
+FWSEC register: reg=0x110040 value=0 sentinel_like=0
+FWSEC register: reg=0x110044 value=0 sentinel_like=0
+FWSEC register: reg=0x110094 value=0 sentinel_like=0
+FWSEC register: reg=0x1100f4 value=0x47b7 sentinel_like=0
+FWSEC register: reg=0x110104 value=0 sentinel_like=0
+FWSEC register: reg=0x11010c value=0 sentinel_like=0
+FWSEC register: reg=0x110118 value=0x602 sentinel_like=0
+FWSEC register: reg=0x110600 value=0x115 sentinel_like=0
+FWSEC register: reg=0x110624 value=0x190 sentinel_like=0
+FWSEC register: reg=0x111668 value=0x1 sentinel_like=0
+FWSEC register: reg=0x111180 value=0x1 sentinel_like=0
+FWSEC register: reg=0x111198 value=0x9 sentinel_like=0
+FWSEC register: reg=0x11119c value=0x400 sentinel_like=0
+FWSEC register: reg=0x111210 value=0xb24 sentinel_like=0
+FWSEC register: reg=0x110108 value=0x80420100 sentinel_like=0
+FWSEC register: reg=0x110110 value=0x28c787 sentinel_like=0
+FWSEC register: reg=0x110114 value=0xd00 sentinel_like=0
+FWSEC register: reg=0x11011c value=0xd00 sentinel_like=0
+FWSEC register: reg=0x110128 value=0 sentinel_like=0
+Falcon start: base=0x110000 cpuctl=0x10 code_va=0 sig_dmem=0xb24 engine_mask=0x400 ucode=9 mailbox=0:0
+FWSEC halt observation: first=0 last=0x10 samples=2022 observed_nonhalt=1 requested_wait_us=101050 error=0
+FWSEC snapshot: phase=post-halt samples=21/21 error=0
+FWSEC register: reg=0x110100 value=0x10 sentinel_like=0
+FWSEC register: reg=0x110008 value=0x10 sentinel_like=0
+FWSEC register: reg=0x110040 value=0 sentinel_like=0
+FWSEC register: reg=0x110044 value=0 sentinel_like=0
+FWSEC register: reg=0x110094 value=0xda550000 sentinel_like=0
+FWSEC register: reg=0x1100f4 value=0x47b7 sentinel_like=0
+FWSEC register: reg=0x110104 value=0xbadf5620 sentinel_like=1
+FWSEC register: reg=0x11010c value=0xbadf5620 sentinel_like=1
+FWSEC register: reg=0x110118 value=0xbadf5620 sentinel_like=1
+FWSEC register: reg=0x110600 value=0xbadf5620 sentinel_like=1
+FWSEC register: reg=0x110624 value=0xbadf5620 sentinel_like=1
+FWSEC register: reg=0x111668 value=0xbadf5620 sentinel_like=1
+FWSEC register: reg=0x111180 value=0xbadf5620 sentinel_like=1
+FWSEC register: reg=0x111198 value=0xbadf5620 sentinel_like=1
+FWSEC register: reg=0x11119c value=0xbadf5620 sentinel_like=1
+FWSEC register: reg=0x111210 value=0xbadf5620 sentinel_like=1
+FWSEC register: reg=0x110108 value=0x80420100 sentinel_like=0
+FWSEC register: reg=0x110110 value=0xbadf5620 sentinel_like=1
+FWSEC register: reg=0x110114 value=0xbadf5620 sentinel_like=1
+FWSEC register: reg=0x11011c value=0xbadf5620 sentinel_like=1
+FWSEC register: reg=0x110128 value=0xbadf5620 sentinel_like=1
+FWSEC result: scratch=0 expected_hi16=0
+FWSEC WPR2: low=0x3ff6000 high=0x3ff6e00 expected_page=0x3ff600 end=0x3ff700000
+AD102 PLM initial: index=0 target=WPR_CFG value=0x4cb8f expected=0xfffff0ff
+AD102 PLM initial: index=1 target=FBPA value=0xffffff0f expected=0xffffffff
+AD102 PLM initial: index=2 target=WPR value=0x4cb8f expected=0xffffffff
+AD102 PLM initial: index=3 target=FEAT value=0xffffff8f expected=0xffffffff
+AD102 SINGLE FIRE: WPR_CFG->FBPA->WPR->FEAT inside one SEC2 execution; max_starts=1
+PLM retry prepare: fire=1 WPR2 -> payload -> reset -> Falcon access -> DMA idle
+PLM WPR2: phase=before-reset fire=1 before=03ff6e00:03ff6000 restored=03ff6e00:03ff6000 expected=03ff6e00:03ff6000 restore_changed=0 matched=1
+PLM WPR2 host restore: fire=1 change_needed=0 host_write_accepted=unproven-same-value
+PLM payload: phase=before-reset copy_match=1 bytes=64000 fixed_four_targets=1 cpu_view_only=1
+Falcon reset begin: base=0x840000
+poll timeout tolerated: reg=0x8400f4 last=0x67b7 mask=0x80000000 expected=0x80000000 budget_us=1000
+Falcon pre-reset timeout tolerated per HW bug 3419321
+Falcon reset done: base=0x840000 hwcfg=0x67b7 chip=0x193000a1
+PLM WPR2: phase=after-reset fire=1 before=03ff6e00:03ff6000 after=03ff6e00:03ff6000 reset_changed=0 matched=1
+PLM payload: phase=after-reset copy_match=1 bytes=64000 fixed_four_targets=1 cpu_view_only=1
+PLM retry DMA idle: access verified after Falcon switch
+PLM retry ready: fire=1 WPR2=03ff6e00:03ff6000; no post-reset WPR2/payload rewrite; same-value readback is not write-permission proof
+Falcon DMA: base=0x840000 dest=0 offset=0x100 src=0x2e83e000 size=0x7d00 cmd=0x614
+Falcon DMA: base=0x840000 dest=0 offset=0 src=0x2e845e00 size=0x6000 cmd=0x600
+SEC2 snapshot: phase=pre-start samples=35/35 error=0
+SEC2 register: name=CPUCTL reg=0x840100 value=0x10 sentinel_like=0
+SEC2 register: name=IRQSTAT reg=0x840008 value=0 sentinel_like=0
+SEC2 register: name=FALCON_MAILBOX0 reg=0x840040 value=0x2e82d000 sentinel_like=0
+SEC2 register: name=FALCON_MAILBOX1 reg=0x840044 value=0 sentinel_like=0
+SEC2 register: name=OS reg=0x840080 value=0 sentinel_like=0
+SEC2 register: name=RM reg=0x840084 value=0x193000a1 sentinel_like=0
+SEC2 register: name=DEBUGINFO reg=0x840094 value=0 sentinel_like=0
+SEC2 register: name=BOOTVEC reg=0x840104 value=0x100 sentinel_like=0
+SEC2 register: name=HWCFG reg=0x840108 value=0x80420100 sentinel_like=0
+SEC2 register: name=HWCFG2 reg=0x8400f4 value=0x47b7 sentinel_like=0
+SEC2 register: name=DMACTL reg=0x84010c value=0 sentinel_like=0
+SEC2 register: name=DMATRFCMD reg=0x840118 value=0x602 sentinel_like=0
+SEC2 register: name=DMATRFBASE reg=0x840110 value=0x2e845e sentinel_like=0
+SEC2 register: name=DMATRFMOFFS reg=0x840114 value=0x5f00 sentinel_like=0
+SEC2 register: name=DMATRFFBOFFS reg=0x84011c value=0x5f00 sentinel_like=0
+SEC2 register: name=DMATRFBASE1 reg=0x840128 value=0 sentinel_like=0
+SEC2 register: name=FBIF_TRANSCFG0 reg=0x840600 value=0x115 sentinel_like=0
+SEC2 register: name=FBIF_CTL reg=0x840624 value=0x190 sentinel_like=0
+SEC2 register: name=PSEC_MAILBOX0 reg=0x840804 value=0 sentinel_like=0
+SEC2 register: name=PSEC_MAILBOX1 reg=0x840808 value=0 sentinel_like=0
+SEC2 register: name=PSEC_MAILBOX2 reg=0x84080c value=0 sentinel_like=0
+SEC2 register: name=PSEC_MAILBOX3 reg=0x840810 value=0 sentinel_like=0
+SEC2 register: name=BCR_CTRL reg=0x841668 value=0x1 sentinel_like=0
+SEC2 register: name=MOD_SEL reg=0x841180 value=0x1 sentinel_like=0
+SEC2 register: name=BROM_CURR_UCODE_ID reg=0x841198 value=0x3 sentinel_like=0
+SEC2 register: name=BROM_ENGIDMASK reg=0x84119c value=0x1 sentinel_like=0
+SEC2 register: name=BROM_PARAADDR0 reg=0x841210 value=0x10 sentinel_like=0
+SEC2 register: name=FEAT_PLM reg=0x823804 value=0xffffff8f sentinel_like=0
+SEC2 register: name=WPR_CFG_PLM reg=0x1fa7cc value=0x4cb8f sentinel_like=0
+SEC2 register: name=FBPA_PLM reg=0x9a0148 value=0xffffff0f sentinel_like=0
+SEC2 register: name=WPR_PLM reg=0x1fa7c4 value=0x4cb8f sentinel_like=0
+SEC2 register: name=WPR2_LOW reg=0x1fa824 value=0x3ff6000 sentinel_like=0
+SEC2 register: name=WPR2_HIGH reg=0x1fa828 value=0x3ff6e00 sentinel_like=0
+SEC2 register: name=SOURCE_ENABLE_CANDIDATE_RAW reg=0x823b00 value=0x4b8f sentinel_like=0
+SEC2 register: name=RESET_PLM_CANDIDATE_RAW reg=0x8403c4 value=0xffffffff sentinel_like=1
+Falcon start: base=0x840000 cpuctl=0x10 code_va=0x100 sig_dmem=0x10 engine_mask=0x1 ucode=3 mailbox=0:0x2e82d000
+SEC2 snapshot: phase=plm-open samples=35/35 error=0
+SEC2 register: name=CPUCTL reg=0x840100 value=0 sentinel_like=0
+SEC2 register: name=IRQSTAT reg=0x840008 value=0 sentinel_like=0
+SEC2 register: name=FALCON_MAILBOX0 reg=0x840040 value=0x67b00001 sentinel_like=0
+SEC2 register: name=FALCON_MAILBOX1 reg=0x840044 value=0 sentinel_like=0
+SEC2 register: name=OS reg=0x840080 value=0 sentinel_like=0
+SEC2 register: name=RM reg=0x840084 value=0x193000a1 sentinel_like=0
+SEC2 register: name=DEBUGINFO reg=0x840094 value=0xda550000 sentinel_like=0
+SEC2 register: name=BOOTVEC reg=0x840104 value=0xbadf5620 sentinel_like=1
+SEC2 register: name=HWCFG reg=0x840108 value=0x80420100 sentinel_like=0
+SEC2 register: name=HWCFG2 reg=0x8400f4 value=0x47b7 sentinel_like=0
+SEC2 register: name=DMACTL reg=0x84010c value=0xbadf5620 sentinel_like=1
+SEC2 register: name=DMATRFCMD reg=0x840118 value=0xbadf5620 sentinel_like=1
+SEC2 register: name=DMATRFBASE reg=0x840110 value=0xbadf5620 sentinel_like=1
+SEC2 register: name=DMATRFMOFFS reg=0x840114 value=0xbadf5620 sentinel_like=1
+SEC2 register: name=DMATRFFBOFFS reg=0x84011c value=0xbadf5620 sentinel_like=1
+SEC2 register: name=DMATRFBASE1 reg=0x840128 value=0xbadf5620 sentinel_like=1
+SEC2 register: name=FBIF_TRANSCFG0 reg=0x840600 value=0xbadf5620 sentinel_like=1
+SEC2 register: name=FBIF_CTL reg=0x840624 value=0xbadf5620 sentinel_like=1
+SEC2 register: name=PSEC_MAILBOX0 reg=0x840804 value=0xbadf5620 sentinel_like=1
+SEC2 register: name=PSEC_MAILBOX1 reg=0x840808 value=0xbadf5620 sentinel_like=1
+SEC2 register: name=PSEC_MAILBOX2 reg=0x84080c value=0xbadf5620 sentinel_like=1
+SEC2 register: name=PSEC_MAILBOX3 reg=0x840810 value=0xbadf5620 sentinel_like=1
+SEC2 register: name=BCR_CTRL reg=0x841668 value=0xbadf5620 sentinel_like=1
+SEC2 register: name=MOD_SEL reg=0x841180 value=0xbadf5620 sentinel_like=1
+SEC2 register: name=BROM_CURR_UCODE_ID reg=0x841198 value=0xbadf5620 sentinel_like=1
+SEC2 register: name=BROM_ENGIDMASK reg=0x84119c value=0xbadf5620 sentinel_like=1
+SEC2 register: name=BROM_PARAADDR0 reg=0x841210 value=0xbadf5620 sentinel_like=1
+SEC2 register: name=FEAT_PLM reg=0x823804 value=0xffffffff sentinel_like=1
+SEC2 register: name=WPR_CFG_PLM reg=0x1fa7cc value=0xfffff0ff sentinel_like=0
+SEC2 register: name=FBPA_PLM reg=0x9a0148 value=0xffffff0f sentinel_like=0
+SEC2 register: name=WPR_PLM reg=0x1fa7c4 value=0xffffffff sentinel_like=1
+SEC2 register: name=WPR2_LOW reg=0x1fa824 value=0x3f4c000 sentinel_like=0
+SEC2 register: name=WPR2_HIGH reg=0x1fa828 value=0x3ff6e00 sentinel_like=0
+SEC2 register: name=SOURCE_ENABLE_CANDIDATE_RAW reg=0x823b00 value=0x4b8f sentinel_like=0
+SEC2 register: name=RESET_PLM_CANDIDATE_RAW reg=0x8403c4 value=0xffffffff sentinel_like=1
+SEC2 observation: reason=plm-open first=0 last=0 plm=0xffffffff samples=1189 observed_nonhalt=1 transitions=1 requested_wait_us=59400 trace_dropped=0 error=0
+SEC2 trace: requested_wait_us=0 cpuctl=0 plm=0xffffff8f
+SEC2 trace: requested_wait_us=50 cpuctl=0 plm=0xffffff8f
+SEC2 trace: requested_wait_us=100 cpuctl=0 plm=0xffffff8f
+SEC2 trace: requested_wait_us=150 cpuctl=0 plm=0xffffff8f
+SEC2 trace: requested_wait_us=200 cpuctl=0 plm=0xffffff8f
+SEC2 trace: requested_wait_us=250 cpuctl=0 plm=0xffffff8f
+SEC2 trace: requested_wait_us=300 cpuctl=0 plm=0xffffff8f
+SEC2 trace: requested_wait_us=350 cpuctl=0 plm=0xffffff8f
+SEC2 trace: requested_wait_us=1000 cpuctl=0 plm=0xffffff8f
+SEC2 trace: requested_wait_us=10000 cpuctl=0 plm=0xffffff8f
+SEC2 trace: requested_wait_us=59400 cpuctl=0 plm=0xffffffff
+AD102 PLM final: index=0 target=WPR_CFG value=0xfffff0ff expected=0xfffff0ff matched=1
+AD102 PLM final: index=1 target=FBPA value=0xffffff0f expected=0xffffffff matched=0
+AD102 PLM final: index=2 target=WPR value=0xffffffff expected=0xffffffff matched=1
+AD102 PLM final: index=3 target=FEAT value=0xffffffff expected=0xffffffff matched=1
+AD102 SINGLE RESULT: booter_ret=0 halt_ret=0 all_expected=0 marker=0x67b00001 marker_ok=1 cpuctl=0x10 debug=0xda550000 WPR2=03ff6e00:03f4c000
+AD102 PLM chain: fires=1/1 required_expected=1; FBPA mismatch is nonfatal; restoring stock signature before SS0/SS1 and Windows handoff
+SELECTOR RESULT: SS0 before=0x64113035 after=0x88888888 expected=0x88888888 matched=1 status=0
+SELECTOR RESULT: SS1 before=0x2 after=0x8 expected=0x8 matched=1 status=0
+SELECTOR SUMMARY: ss0_status=0 ss1_status=0 unlock_matched=1; recovering for Windows
+pre-FLR selectors: ss0=0x88888888 expected=0x88888888 ss1=0x8 expected=0x8
+selector pre-FLR readback: unlock_matched=1; recovery continues on mismatch, unlock success does not
+PCIe FLR begin: BME=0 DMA retained, chip=0x193000a1
+PCIe FLR returned: result=0
+post-FLR BAR ready: chip=0x193000a1
+post-FLR GFW result: error=0 pci=0x270210de plm=0x8b8f boot=0x3ff cpuctl=0x10 budget_us=2050000
+engine reset assert: phase=post-FLR base=0x840000 before=0 write=0x1
+engine reset propagation: phase=post-FLR base=0x840000 first=0x1 tenth=0x1
+engine reset asserted: phase=post-FLR base=0x840000 error=0 last=0x1
+engine reset release: phase=post-FLR base=0x840000 before=0x1 write=0
+engine reset released: phase=post-FLR base=0x840000 engine=0 hwcfg2=0x67b7
+post-FLR SEC2 reset released, GSP halted, BME=0 pending=0 WPR2=1ffffe00:00000000 SS0=88888888 SS1=00000008
+selector post-FLR readback: unlock_matched=1; recovery and unlock result are separate
+driver probe resources: phase=handoff empty=1
+restore streaming mask: actual=0xffffffff expected=0xffffffff
+restore coherent mask: actual=0xffffffff expected=0xffffffff
+restore PCI command: actual=0x2 original=0x2 mask=0x6
+TRANSACTION OUTCOME: result=0 firmware_started=1 required_plm=1 all_plm=0 selectors_before_flr=1 selectors_after_flr=1 recovered=1
+transaction result=0 containment=0 started=1 quiesced=1 retained=0 maps=0
+final selector/gsp readback: SS0=0x88888888 SS1=0x8 WPR2_HI=0 GSP_CPUCTL=0x10
+entry command restore detail: step=complete api_status=0 id=0x270210de before=0x2 after=0 attributes=0
+entry config delta: offset=0x80 entry=0x92930 final=0x2930 xor=0x90000
+entry restore check: command_status=0 config_read_status=0 compared=1 differences=1 fault=0 retained=0
+entry status policy: verified_flr=1 accepted_ced_urd_clear=1 configuration_accepted=1
+release={"bridge_status":"0x0000000000000000","owners_status":"0x0000000000000000","display_status":"0x0000000000000000","close_status":"0x0000000000000000","reservation_released":true}
+FINAL status=0 phase=transaction attempted=1 firmware_started=1 restored_entry_command=0 performance_validated=0

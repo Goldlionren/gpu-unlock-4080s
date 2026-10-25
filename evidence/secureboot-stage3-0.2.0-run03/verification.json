@@ -1,0 +1,71 @@
+{
+  "schema": 1,
+  "version": "stage3-0.2.0-disk-candidate",
+  "run": "RUN03",
+  "build_id": "a779b1312b1c25f2daba214af72e14c9540470a67151b3624a87b080288a969b",
+  "unsigned_efi_sha256": "cd506a77b942009e55daad312aa6bfdcbcfabfedfcd851e09466317aecd32513",
+  "signed_efi_sha256": "32d3e756af38f66a1a5b1f68790d4058aed93164dac39f0af4562e71bf8af128",
+  "report_sha256": "bd2474d7144579ca71a07f74d776b2a2f53c9eb29700724a8948d44ba9361d78",
+  "trust_check_sha256": "40a85c53de9599c366a87baac9226f0a8dab080e16b04ae7ea53645be6a496c6",
+  "certificate_thumbprint": "49561A2E65953174248986EE16E639C51000798F",
+  "authenticode_image_sha256": "8ae951c67c657c5c0f7527a660204a99496978e541cc126f05786c2b55c2d723",
+  "cms_signature_and_executable_byte_identity_rechecked": true,
+  "signature_verification_runtime": "Windows PowerShell 5.1",
+  "source_matches_candidate_manifest": true,
+  "installed_efi_hash_verified_by_collector": true,
+  "internal_volume": 1,
+  "secure_boot": 1,
+  "setup_mode": 0,
+  "firmware_authentication_not_overridden": true,
+  "windows_confirm_secure_boot_uefi": true,
+  "all_trust_variables_match_plan": true,
+  "trust_variable_hashes": {
+    "PK": {
+      "bytes": 1285,
+      "sha256": "e24e7d4473077fb0d197075154e0887f403808bc87b2a8c13d4b573fa05e6dbd"
+    },
+    "KEK": {
+      "bytes": 3066,
+      "sha256": "cc3a5dbc7b3aec3b60c0da33510bf93f402479bbf445dc360e6111afa70c6342"
+    },
+    "db": {
+      "bytes": 8494,
+      "sha256": "b7614da8b5b2f99fdb25653722032cc53297adf700b487306a48f6b879b142c1"
+    },
+    "dbx": {
+      "bytes": 23844,
+      "sha256": "332f653745031a67bc1d30b08815a6ea9d6cfcf886d91243ab3d119954c8ec98"
+    }
+  },
+  "trust_plan": "Original PK, KEK and dbx unchanged; db is original bytes plus one local certificate ESL.",
+  "required_plm": 1,
+  "all_plm": 0,
+  "fbpa_mismatch_nonfatal": true,
+  "selectors_before_flr": true,
+  "selectors_after_flr": true,
+  "recovered": true,
+  "dma_maps_remaining": 0,
+  "dma_resources_retained": 0,
+  "final_status": 0,
+  "secure_boot_enabled_hardware_run_verified": true,
+  "windows_arrival_user_confirmed": true,
+  "windows_boot_utc_from_collector": "2026-10-25T13:57:05.5000000Z",
+  "trust_capture_utc": "2026-10-25T13:58:51.4480941Z",
+  "same_boot_independently_verified": false,
+  "boot_association_basis": "User confirms enabling Secure Boot, pressing U and returning to Windows; RUN03 records SecureBoot=1; Windows capture confirms enabled state. Collector has no independent boot binding.",
+  "performance_validated": false,
+  "negative_firmware_signature_boot_test_performed": false,
+  "scope": "One observed run on the pinned RTX 4080 SUPER / Intel NUC12 / Windows 11 Pro system; local custom firmware trust, not a Microsoft-issued signature.",
+  "historical_flags_preserved": true,
+  "matched_report_markers": [
+    "build_id=a779b1312b1c25f2daba214af72e14c9540470a67151b3624a87b080288a969b",
+    "boot policy: secure_boot=1 internal_volume=1 firmware_authentication_not_overridden=1",
+    "Windows boot manager preload: one internal candidate, status=0",
+    "PROM double-read and exact board hash matched=1",
+    "TRANSACTION OUTCOME: result=0 firmware_started=1 required_plm=1 all_plm=0 selectors_before_flr=1 selectors_after_flr=1 recovered=1",
+    "transaction result=0 containment=0 started=1 quiesced=1 retained=0 maps=0",
+    "final selector/gsp readback: SS0=0x88888888 SS1=0x8 WPR2_HI=0 GSP_CPUCTL=0x10",
+    "entry status policy: verified_flr=1 accepted_ced_urd_clear=1 configuration_accepted=1",
+    "FINAL status=0 phase=transaction attempted=1 firmware_started=1 restored_entry_command=0 performance_validated=0"
+  ]
+}

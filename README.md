@@ -1,10 +1,12 @@
 # RTX 4080 SUPER 16GB UEFI unlock experiment
 
-**0.2.0 已完成本机一次硬盘启动、GPU 事务与返回 Windows 的验证，Secure Boot 保持关闭。** [本次 RUN00 证据](evidence/disk-boot-stage3-0.2.0-run00/verification.json)；尚未验证开启 Secure Boot，也未重新测量本次性能。下面的性能数据仍属于归档的 0.1.2。新方案、采集与签名工具见 [硬盘启动与 Secure Boot 说明](DISK-BOOT-SECUREBOOT.zh-CN.md)。
+**2026-10-26：本机已验证硬盘 EFI 启动、Secure Boot 开启、GPU 解锁事务成功并返回 Windows，无需 U 盘。** 0.2.0 的 [RUN03 报告与验收说明](evidence/secureboot-stage3-0.2.0-run03/README.md) 记录 `secure_boot=1 internal_volume=1`、FLR 前后选择器匹配和恢复成功；Windows 确认 Secure Boot=True、SetupMode=0，四项信任库符合登记计划。此前关闭 Secure Boot 的 [RUN00 证据](evidence/disk-boot-stage3-0.2.0-run00/verification.json) 保留。
 
-Windows 11 Pro 上的一次真实实机适配与测量。成功版本 **stage3-0.1.2**：在 Windows 启动前运行自定义 UEFI 程序，核对 SS0/SS1 写入及 FLR 后读回，恢复设备后自动进入原 Windows。
+使用本机证书签署 EFI，并在固件 db 登记该证书；这是本机自定义信任实测，不是微软通用签名。每次仍需按 U 执行事务。步骤见 [硬盘启动说明](DISK-BOOT-SECUREBOOT.zh-CN.md) 和 [签名、登记与 Secure Boot 实测](SECUREBOOT-SIGNING.zh-CN.md)。**本次未重新测量性能，下面的数据仍属于 Secure Boot 关闭时的 0.1.2。**
 
-**这是单块已测板卡的实验代码，不是通用 RTX 40 系列工具。** 入口固定为 AD103、`10de:2702 / 19da:4702`、16GB、特定 BAR/ROM 哈希与 Intel GOP 拓扑。Secure Boot 关闭；不刷写 VBIOS、不替换 NVIDIA Windows 驱动。其他板卡应被检查拒绝，不能靠删除检查获得兼容性。
+Windows 11 Pro 上的真实实机适配与测量。性能归档版本 **stage3-0.1.2**，硬盘与 Secure Boot 实测版本 **stage3-0.2.0-disk-candidate**：在 Windows 启动前运行自定义 UEFI 程序，核对 SS0/SS1 写入及 FLR 后读回，恢复设备后进入原 Windows。
+
+**这是单块已测板卡的实验代码，不是通用 RTX 40 系列工具。** 入口固定为 AD103、`10de:2702 / 19da:4702`、16GB、特定 BAR/ROM 哈希与 Intel GOP 拓扑。不刷写 VBIOS、不替换 NVIDIA Windows 驱动。其他板卡应被检查拒绝，不能靠删除检查获得兼容性。
 
 ## 实测结果
 

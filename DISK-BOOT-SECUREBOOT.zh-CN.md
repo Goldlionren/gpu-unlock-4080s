@@ -1,12 +1,12 @@
-# 硬盘启动与 Secure Boot：0.2.0 候选方案
+# 硬盘启动与 Secure Boot：0.2.0 本机实测
 
 日期：2026-10-25。目标为这台 Windows 11 Pro / NUC12 / RTX 4080 SUPER 16GB。
 
-更新至 2026-10-26：已安装到本机 ESP、创建独立启动项，并完成一次硬盘启动与 GPU 事务，用户确认自动返回 Windows。**本次 Secure Boot=0，未登记签名证书，也没有 Secure Boot 开启状态的成功报告或本次新性能数据。** 0.1.2 的历史性能不能直接作为本次性能结果。
+更新至 2026-10-26 00:59：已安装到本机 ESP、创建独立启动项，完成本机证书签名与固件信任登记。**RUN03 已验证 Secure Boot 开启时从硬盘执行 GPU 事务，用户确认按 U 后成功返回 Windows。** Windows Confirm-SecureBootUEFI=True、SetupMode=0，PK/KEK/db/dbx 全部符合登记计划；报告包含 `secure_boot=1 internal_volume=1`。见 [RUN03 原始报告与验收说明](evidence/secureboot-stage3-0.2.0-run03/README.md)。本次没有新性能数据，0.1.2 的历史性能不能直接作为本次性能结果。
 
-后续签名进展：签名 EFI 已生成、通过密码学和内容一致性校验并安装到 ESP；固件证书登记尚待 BIOS Setup Mode。最新步骤与实际哈希见 [本机签名与 Secure Boot 登记](SECUREBOOT-SIGNING.zh-CN.md)。
+签名 EFI 已通过密码学和内容一致性校验；本机采用 Custom / Setup Mode 登记，恢复原 Intel PK、原 KEK 与 dbx，db 保留原库并增加一张本机签名证书。重启后进入 User Mode，再开启 Secure Boot。最新步骤与实际哈希见 [本机签名与 Secure Boot 登记](SECUREBOOT-SIGNING.zh-CN.md)。这是本机自定义信任路径，不能把本机证书当作其他机器默认信任的微软签名。
 
-本次 [RUN00 报告](evidence/disk-boot-stage3-0.2.0-run00/REPORT.TXT) 和 [核验记录](evidence/disk-boot-stage3-0.2.0-run00/verification.json) 表明：internal_volume=1、事务 result=0、required_plm=1、FLR 前后选择器匹配、recovered=1、retained=0、maps=0、最终 status=0。all_plm=0 对应已知非致命 FBPA 未匹配，不能描述成四个 PLM 全部成功。报告 SHA256 为 `cd48ed65bd14489879551f3a9837bb4d30519b2f3acc37f98f9cce0c0c5dd26f`。报告 build ID、安装包 EFI 哈希、当前源码与原候选 manifest 均已交叉核对。
+此前 Secure Boot 关闭时的 [RUN00 报告](evidence/disk-boot-stage3-0.2.0-run00/REPORT.TXT) 和 [核验记录](evidence/disk-boot-stage3-0.2.0-run00/verification.json) 表明：internal_volume=1、事务 result=0、required_plm=1、FLR 前后选择器匹配、recovered=1、retained=0、maps=0、最终 status=0。RUN03 在 Secure Boot 开启时也通过这些检查。两次 all_plm=0 均对应已知非致命 FBPA 未匹配，不能描述成四个 PLM 全部成功。RUN00 报告 SHA256 为 `cd48ed65bd14489879551f3a9837bb4d30519b2f3acc37f98f9cce0c0c5dd26f`；RUN03 为 `bd2474d7144579ca71a07f74d776b2a2f53c9eb29700724a8948d44ba9361d78`。报告 build ID、对应 EFI 哈希、当前源码与原候选 manifest 均已交叉核对。
 
 原构建 manifest 的 hardware_tested=false 及程序头部未实测提示是构建时状态，保留作为历史记录；上述新增证据记录这次后续实机结果。采集器没有独立证明报告与 Windows 同一次启动，返回 Windows 的关联同时依赖用户本次操作确认。
 
@@ -52,7 +52,7 @@ EFI/
 
 签名只解决主机固件对 EFI 的身份验证；不会直接让 NVIDIA 固件解锁过程变得可信或兼容。开启 Secure Boot 后的 DMA/IOMMU 行为、GPU 事务与 Windows 接续必须重新实测。固件显示 Secure Boot 已启用，也不能据此承诺所有反作弊、设备证明或组织安全策略都接受新增自定义信任。
 
-## 当前先执行：只读采集
+## 首次部署：只读采集（本机已完成）
 
 以管理员身份打开 Windows PowerShell：
 
@@ -79,7 +79,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File F:\AI\gpu-unlock-4080s\Get-B
 
 私钥应留在本机证书存储或专门离线保管，不能提交 Git；`*.pfx / *.p12 / *.key` 和 `LOCAL-*` 已忽略。现已在 Admin 的 CurrentUser\My 中创建不可导出的本机签名私钥；没有导出私钥。此处为工具说明，实际签名安装与固件登记状态见上方最新记录。
 
-## 验证与下一轮顺序
+## 首次部署的验证顺序
 
 本次构建已运行 boot-media、port、app、admission 测试，并使用本机精确匹配的 PROM fixture 跑完 43 个 core 事务模拟场景。测试不执行真实 GPU；主机 Secure Boot 场景模拟的是入口与分支逻辑，不模拟固件密码学验证。构建 manifest 标记 `hardware_tested=false`。
 
@@ -116,7 +116,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File F:\AI\gpu-unlock-4080s\Get-B
 
 2026-10-26 首次安装在挂载校验处停止：`mountvol S: /S` 成功，但 `Get-Partition -DriveLetter S` 未找到对象。状态记录为 `entry_id=null`、`new_files_retained=false`、`unmount_exit_code=0`，未复制候选文件、未创建启动项，临时挂载已撤销，无需回滚候选安装。
 
-修正后先通过已验证分区取得 `Get-Volume.Path`，再使用 [Microsoft QueryDosDeviceW](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-querydosdevicew) 比较目标卷 GUID 名称和挂载盘符的当前 NT 设备映射。不能直接把分区 GUID 当作卷 GUID；也不会因盘符查询失败而跳过身份检查。安装与报告导出共用同一校验，查询失败或映射不一致均停止。新增 `tests/esp_mount_tests.ps1` 覆盖 11 种情况、13 项断言；并在本机 PowerShell 5.1 只读验证 C: 与其卷 GUID 映射一致，系统 ESP 的卷 GUID 可解析为 `\Device\HarddiskVolume1`。修正后尚需用户重新执行管理员安装才能验证实际 S: 挂载路径。
+修正后先通过已验证分区取得 `Get-Volume.Path`，再使用 [Microsoft QueryDosDeviceW](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-querydosdevicew) 比较目标卷 GUID 名称和挂载盘符的当前 NT 设备映射。不能直接把分区 GUID 当作卷 GUID；也不会因盘符查询失败而跳过身份检查。安装与报告导出共用同一校验，查询失败或映射不一致均停止。新增 `tests/esp_mount_tests.ps1` 覆盖 11 种情况、13 项断言；并在本机 PowerShell 5.1 只读验证 C: 与其卷 GUID 映射一致，系统 ESP 的卷 GUID 可解析为 `\Device\HarddiskVolume1`。修正后的实际安装和后续 RUN00/RUN03 采集均已通过挂载身份检查。
 
 ## 本机信任库解析结果
 
@@ -124,4 +124,4 @@ powershell -NoProfile -ExecutionPolicy Bypass -File F:\AI\gpu-unlock-4080s\Get-B
 
 相对 dbDefault，当前 db 新增后两张 2023 证书，且不含默认库中的 UEFIappl1。当前 dbx 有 495 个签名条目，默认库有 371 个，差异为新增 124 个、缺失 0 个。这里是离线解析得到的事实，不是对各条撤销内容的独立有效性验证。不能将 Restore Factory Keys 当成保持当前信任状态不变的操作。
 
-`Inspect-SecureBootDb.ps1` 可离线复核公开变量：先核对采集 SHA256，再有界解析 EFI_SIGNATURE_LIST，读取 X.509 名称与指纹并比较当前/默认条目；不访问固件、不生成私钥、不登记证书。当前平台处于 User Mode，不具有 OEM/Microsoft 私钥时，不能假设管理员权限足以直接向 db 追加证书。后续仍需核实本机固件的 Custom Mode 授权方式。
+`Inspect-SecureBootDb.ps1` 可离线复核公开变量：先核对采集 SHA256，再有界解析 EFI_SIGNATURE_LIST，读取 X.509 名称与指纹并比较当前/默认条目；不访问固件、不生成私钥、不登记证书。User Mode 下不能假设管理员权限足以直接向 db 追加证书。本机后续已经完成 Custom / Setup Mode 登记并恢复 User Mode；当前 db 为原五张证书加一张本机证书，原 PK/KEK/dbx 逐字节保留。不要重复清空或登记密钥。

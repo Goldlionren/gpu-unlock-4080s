@@ -1,0 +1,13 @@
+﻿{
+    "status":  "SECURE_BOOT_ENABLED_KEYS_VERIFIED",
+    "all_keys_match":  true,
+    "matches":  {
+                    "PK":  true,
+                    "KEK":  true,
+                    "db":  true,
+                    "dbx":  true
+                },
+    "setup_mode":  0,
+    "secure_boot":  1,
+    "secure_boot_efi_execution_verified":  false
+}

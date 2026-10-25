@@ -2,6 +2,8 @@
 
 记录日期：2026-10-25。时间采用原始记录中的 Australia/Sydney 时区，当日 UTC+11。
 
+后续进展（2026-10-26）：0.2.0 已在本机完成硬盘启动及 **Secure Boot 开启时的 GPU 事务与返回 Windows**，见 [RUN03 实测证据](evidence/secureboot-stage3-0.2.0-run03/README.md) 和 [签名登记说明](SECUREBOOT-SIGNING.zh-CN.md)。该轮没有重新跑性能基准；本文下方的 0.1.2、Secure Boot 关闭条件及原始 FP32/Tensor 数据保持原样。
+
 本报告对应本机 RTX 4080 SUPER 16GB、Windows 11 Pro、Secure Boot 关闭、自定义 UEFI 程序先于 Windows 显卡驱动执行的实验。成功程序版本为 **stage3-0.1.2**，成功实机记录为 **RUN05**。
 
 已取得的证据是：选择器写入及 FLR 前后读回通过、硬件恢复与释放检查通过、用户确认自动进入 Windows，以及同一启动周期内两次原始 GEMM 基准测得 Tensor 吞吐提升。**FP32_STRICT 没有提升，三种尺寸的两次均值均小幅下降。**
