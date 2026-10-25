@@ -2,6 +2,8 @@
 
 2026-10-26 状态：已在 Admin 账户生成 RSA-2048 / SHA-256 本机签名证书，私钥以不可导出方式保存在 CurrentUser\My。已签署实测 0.2.0 EFI，并安装到原 ESP 的 `\EFI\GPUUnlock\GPUUnlock.efi`。尚未登记固件信任，Secure Boot 仍关闭；没有开启后的成功报告。
 
+00:43 更新：用户完成 BIOS Custom / Reset to Setup Mode 并执行登记后，已独立重新读取固件。原 PK、KEK、dbx 与最新备份逐字节一致，db 与“原库加一张本机签名证书”逐字节一致。**密钥内容已登记并核验，但 SetupMode 仍为 1、SecureBoot 为 0，状态为 KEYS_VERIFIED_MODE_PENDING。** 尚不能宣布 User Mode 或 Secure Boot 开启成功，也未证明原因必然是延迟生效；下一步保持关闭并重启后只读复核。
+
 | 项目 | 实际值 |
 |---|---|
 | 证书指纹 | `49561A2E65953174248986EE16E639C51000798F` |
@@ -68,9 +70,19 @@ cd F:\AI\gpu-unlock-4080s
 
 每次写入前再次读取，防止忽略并发变化。每次写入后立即核对；失败时停止，不以删除所有密钥作为自动回退。逻辑经过 10 个模拟场景、34 项检查，包括保留旧库、空库恢复、部分完成后继续、错误模式、内容变化、写入失败和回读不符。**这些不是本机固件写入的成功证明。**
 
+后续修正增加了模式未即时切换的情况，共 14 个模拟场景、45 项检查。原脚本在成功恢复 PK 后要求立即读到 SetupMode=0，因本机仍返回 1 而报错。新逻辑只有在四项内容全部精确匹配时才返回“模式待确认”，不会把它标记为已启用；重复执行时不再次写入这些已验证的密钥。内容不符仍停止。该修正没有改变固件变量或跳过内容检查。
+
 使用的 [Set-SecureBootUEFI](https://learn.microsoft.com/en-us/powershell/module/secureboot/set-securebootuefi?view=windowsserver2025-ps) 接收原始格式化内容并生成认证变量写入封装；只有 Setup Mode 下才执行此处未使用旧 PK/KEK 私钥签名的更新。原备份作为本流程 Setup Mode 恢复内容使用，不能当作在 User Mode 任意写回的授权。
 
 成功会输出 `ENROLLED: ... SetupMode=0`，并在 bundle 下生成新的 enrollment 目录、写入意图和 after 采集。把输出路径交回核验，**此时仍先保持 Secure Boot 关闭**。确认原 PK/KEK/dbx 保留、db 仅增加预定证书后，再进 BIOS 开启 Secure Boot 并重新测试 GPUUnlock。
+
+若输出 `KEYS_VERIFIED_MODE_PENDING`，不再 Reset 或重复登记，保持 Secure Boot Disabled，重启一次后在管理员 PowerShell 执行：
+
+```powershell
+F:\AI\gpu-unlock-4080s\Check-SecureBootEnrollment.ps1
+```
+
+该工具只读采集，不挂载 ESP、不写密钥、不改启动项；核对信任库与模式，保存 `LOCAL-secureboot-checks\<时间>\verification.json`。只有四库匹配且 SetupMode=0 才属于模式就绪；SecureBoot=1 的变量状态仍不独立证明 GPUUnlock 已在验证开启的启动链上成功执行。
 
 若未成功，先保持 Disabled，通过原 Windows Boot Manager 返回系统，保留 ERROR 和写入记录。不要恢复出厂库或尝试移除剩余密钥。
 

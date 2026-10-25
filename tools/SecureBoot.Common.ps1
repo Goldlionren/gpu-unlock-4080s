@@ -27,10 +27,34 @@ function Test-GpuBytesEqual {
     param([byte[]]$Left,[byte[]]$Right)
     return [Convert]::ToBase64String($Left) -eq [Convert]::ToBase64String($Right)
 }
+function Get-GpuTrustState {
+    param([scriptblock]$Read,[hashtable]$Original,[byte[]]$Addition)
+    foreach($name in @('PK','KEK','db','dbx')) {if(-not $Original[$name].Length) {throw ('Empty baseline '+$name)}}
+    if(-not $Addition.Length) {throw 'Empty db addition'}
+    [byte[]]$setup=@(& $Read 'SetupMode'); [byte[]]$secure=@(& $Read 'SecureBoot')
+    if($setup.Length -ne 1 -or $secure.Length -ne 1 -or $setup[0] -gt 1 -or $secure[0] -gt 1) {throw 'Invalid SecureBoot/SetupMode readback'}
+    $expected=@{PK=$Original.PK;KEK=$Original.KEK;dbx=$Original.dbx;db=[byte[]]($Original.db+$Addition)}
+    $matches=[ordered]@{}; $all=$true
+    foreach($name in @('PK','KEK','db','dbx')) {
+        $matches[$name]=Test-GpuBytesEqual ([byte[]]@(& $Read $name)) $expected[$name]
+        if(-not $matches[$name]) {$all=$false}
+    }
+    $status=if(-not $all) {'KEY_CONTENT_MISMATCH'}
+        elseif($setup[0] -eq 1 -and $secure[0] -eq 1) {'INCONSISTENT_FIRMWARE_MODE'}
+        elseif($setup[0] -eq 1) {'KEYS_VERIFIED_MODE_PENDING'}
+        elseif($secure[0] -eq 1) {'SECURE_BOOT_ENABLED_KEYS_VERIFIED'}
+        else {'KEYS_VERIFIED_USER_MODE_SECURE_BOOT_OFF'}
+    [pscustomobject]@{status=$status;all_keys_match=$all;matches=[pscustomobject]$matches;setup_mode=[int]$setup[0];secure_boot=[int]$secure[0];secure_boot_efi_execution_verified=$false}
+}
 function Invoke-GpuTrustEnrollment {
     param([scriptblock]$Read,[scriptblock]$Write,[hashtable]$Original,[byte[]]$Addition,[switch]$Apply)
     [byte[]]$setup=@(& $Read 'SetupMode'); [byte[]]$secure=@(& $Read 'SecureBoot')
     if($setup.Length -ne 1 -or $secure.Length -ne 1 -or $secure[0] -ne 0) {throw 'Expected readable variables and Secure Boot OFF'}
+    $existing=Get-GpuTrustState -Read $Read -Original $Original -Addition $Addition
+    if($existing.all_keys_match) {
+        if($existing.setup_mode -eq 1) {return 'KEYS_VERIFIED_MODE_PENDING: all four key databases match; no write needed. Restart with Secure Boot OFF, then run Check-SecureBootEnrollment.ps1.'}
+        return 'ENROLLED: all four key databases already match, SetupMode=0; no write needed'
+    }
     if($setup[0] -ne 1) {
         if(-not $Apply) {return 'WAITING_FOR_FIRMWARE_SETUP_MODE: no firmware write attempted'}
         throw 'SetupMode must be 1. No key write attempted; authorize Setup Mode in firmware first.'
@@ -65,7 +89,8 @@ function Invoke-GpuTrustEnrollment {
         & $Write -Name $name -Content $content -Append $append | Out-Null
         if(-not (Test-GpuBytesEqual ([byte[]]@(& $Read $name)) $desired[$name])) {throw ('Firmware write readback mismatch: '+$name+'; stopped, do not enable Secure Boot')}
     }
-    [byte[]]$setup=@(& $Read 'SetupMode')
-    if($setup.Length -ne 1 -or $setup[0] -ne 0) {throw 'Original PK is restored but User Mode was not observed; inspect before reboot'}
+    $final=Get-GpuTrustState -Read $Read -Original $Original -Addition $Addition
+    if(-not $final.all_keys_match -or $final.secure_boot -ne 0) {throw 'Final trust/mode readback changed; keep Secure Boot OFF and inspect'}
+    if($final.setup_mode -eq 1) {return 'KEYS_VERIFIED_MODE_PENDING: all four key databases match; User Mode not observed. Restart with Secure Boot OFF, then run Check-SecureBootEnrollment.ps1. Do not repeat key writes.'}
     return 'ENROLLED: baseline PK/KEK/dbx verified, baseline db plus one signing certificate verified, SetupMode=0'
 }
