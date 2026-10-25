@@ -2,7 +2,11 @@
 
 日期：2026-10-25。目标为这台 Windows 11 Pro / NUC12 / RTX 4080 SUPER 16GB。
 
-当前完成了源码适配、编译、主机模拟测试和硬盘目录打包；**尚未安装到 ESP、创建固件启动项、登记证书，也没有 Secure Boot 开启状态的实机成功报告。** 已测 0.1.2 的性能与报告不能证明本候选版成功。
+更新至 2026-10-26：已安装到本机 ESP、创建独立启动项，并完成一次硬盘启动与 GPU 事务，用户确认自动返回 Windows。**本次 Secure Boot=0，未登记签名证书，也没有 Secure Boot 开启状态的成功报告或本次新性能数据。** 0.1.2 的历史性能不能直接作为本次性能结果。
+
+本次 [RUN00 报告](evidence/disk-boot-stage3-0.2.0-run00/REPORT.TXT) 和 [核验记录](evidence/disk-boot-stage3-0.2.0-run00/verification.json) 表明：internal_volume=1、事务 result=0、required_plm=1、FLR 前后选择器匹配、recovered=1、retained=0、maps=0、最终 status=0。all_plm=0 对应已知非致命 FBPA 未匹配，不能描述成四个 PLM 全部成功。报告 SHA256 为 `cd48ed65bd14489879551f3a9837bb4d30519b2f3acc37f98f9cce0c0c5dd26f`。报告 build ID、安装包 EFI 哈希、当前源码与原候选 manifest 均已交叉核对。
+
+原构建 manifest 的 hardware_tested=false 及程序头部未实测提示是构建时状态，保留作为历史记录；上述新增证据记录这次后续实机结果。采集器没有独立证明报告与 Windows 同一次启动，返回 Windows 的关联同时依赖用户本次操作确认。
 
 ## 硬盘启动的布局
 

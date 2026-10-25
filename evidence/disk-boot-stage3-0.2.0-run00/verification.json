@@ -1,0 +1,31 @@
+{
+  "build_id": "a779b1312b1c25f2daba214af72e14c9540470a67151b3624a87b080288a969b",
+  "efi_sha256": "cd506a77b942009e55daad312aa6bfdcbcfabfedfcd851e09466317aecd32513",
+  "report_sha256": "cd48ed65bd14489879551f3a9837bb4d30519b2f3acc37f98f9cce0c0c5dd26f",
+  "source_matches_candidate_manifest": true,
+  "internal_volume": 1,
+  "secure_boot": 0,
+  "required_plm": 1,
+  "all_plm": 0,
+  "fbpa_mismatch_nonfatal": true,
+  "selectors_before_flr": true,
+  "selectors_after_flr": true,
+  "recovered": true,
+  "dma_maps_remaining": 0,
+  "final_status": 0,
+  "windows_arrival_user_confirmed": true,
+  "windows_boot_utc_from_collector": "2026-10-25T13:11:01.5000000Z",
+  "same_boot_independently_verified": false,
+  "performance_validated": false,
+  "secure_boot_enabled_tested": false,
+  "matched_report_markers": [
+    "boot policy: secure_boot=0 internal_volume=1 firmware_authentication_not_overridden=1",
+    "Windows boot manager preload: one internal candidate, status=0",
+    "PROM double-read and exact board hash matched=1",
+    "TRANSACTION OUTCOME: result=0 firmware_started=1 required_plm=1 all_plm=0 selectors_before_flr=1 selectors_after_flr=1 recovered=1",
+    "transaction result=0 containment=0 started=1 quiesced=1 retained=0 maps=0",
+    "final selector/gsp readback: SS0=0x88888888 SS1=0x8 WPR2_HI=0 GSP_CPUCTL=0x10",
+    "entry status policy: verified_flr=1 accepted_ced_urd_clear=1 configuration_accepted=1",
+    "FINAL status=0 phase=transaction attempted=1 firmware_started=1 restored_entry_command=0 performance_validated=0"
+  ]
+}

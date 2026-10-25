@@ -1,6 +1,6 @@
 # RTX 4080 SUPER 16GB UEFI unlock experiment
 
-**当前分支新增 0.2.0 硬盘启动 / Secure Boot 候选适配，尚未实机验证。** 下面的成功与性能数据仍属于归档的 0.1.2。新方案、只读采集与签名工具见 [硬盘启动与 Secure Boot 说明](DISK-BOOT-SECUREBOOT.zh-CN.md)。
+**0.2.0 已完成本机一次硬盘启动、GPU 事务与返回 Windows 的验证，Secure Boot 保持关闭。** [本次 RUN00 证据](evidence/disk-boot-stage3-0.2.0-run00/verification.json)；尚未验证开启 Secure Boot，也未重新测量本次性能。下面的性能数据仍属于归档的 0.1.2。新方案、采集与签名工具见 [硬盘启动与 Secure Boot 说明](DISK-BOOT-SECUREBOOT.zh-CN.md)。
 
 Windows 11 Pro 上的一次真实实机适配与测量。成功版本 **stage3-0.1.2**：在 Windows 启动前运行自定义 UEFI 程序，核对 SS0/SS1 写入及 FLR 后读回，恢复设备后自动进入原 Windows。
 
