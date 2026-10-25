@@ -63,6 +63,28 @@ fixture 仅接受 SHA256 `dd5a21fc1434583d3660de35f60799c2cce3b72cd5330dd1d7e5b0
 
 ## 核验数据与性能采集
 
+### 判断当前启动后的性能状态
+
+在本机 Windows PowerShell 中执行，无需管理员权限：
+
+```powershell
+& F:\AI\gpu-unlock-4080s\Check-UnlockStatus.ps1
+```
+
+脚本默认使用本机原 ComfyUI Python；其他环境可传 `-Python 'C:\your-venv\Scripts\python.exe'`。先暂停 ComfyUI 推理、游戏等 GPU 负载。它复用原始基准，仅测 8192 尺寸、运行两次，结果和原始日志写入忽略的 `LOCAL-unlock-status`，不更改固件、驱动或启动项。基准中的 STOCK 标题和文件名是历史命名，不表示当前处于原版状态。
+
+| 输出 | 含义 |
+|---|---|
+| `UNLOCKED_PERFORMANCE_LIKELY` | 当前 FP16/BF16 表现接近本机历史解锁数据 |
+| `STOCK_PERFORMANCE_LIKELY` | 当前表现接近本机原版数据，不能单独证明寄存器未解锁 |
+| `INCONCLUSIVE` | 环境变化、两次波动或性能不符合唯一参考，需要进一步检查 |
+
+它比较两次 FP16/BF16 与原版约 108/108 TFLOPS、解锁后约 174/181 TFLOPS 的记录；要求两种类型的每次结果均落在某一参考均值 ±15% 内、两次比值不超过 1.10，并检查 GPU、驱动、VBIOS、功耗限制、PyTorch/CUDA 和精度设置一致。阈值是本机经验规则，不是统计置信度。FP32 没有观察到提升、FP8 波动较大，因此不用于该判定。
+
+**这是当前性能检查，不直接读取 Windows 下的 SS0/SS1。** 即使驱动与 API 标签相同，也未证明实际机器内核相同；负载、温度和频率会影响结果。Secure Boot=True、CUDA 可用、BF16 支持或旧 REPORT 成功都不能单独证明当前已解锁。此前的 UEFI 寄存器验收与本次现场性能可作为互相补充的证据。
+
+### 历史证据与完整性能采集
+
 只核验公开证据，不运行 GPU：
 
 ```powershell
