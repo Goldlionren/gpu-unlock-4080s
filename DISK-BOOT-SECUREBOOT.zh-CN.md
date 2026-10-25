@@ -108,6 +108,10 @@ powershell -NoProfile -ExecutionPolicy Bypass -File F:\AI\gpu-unlock-4080s\Get-B
 
 新增工具验证：`tests/disk_install_tests.ps1` 覆盖 16 个登记/回读/失败回退场景，130 项断言；`tests/disk_plan_tests.ps1` 使用实际候选包、模拟系统状态运行 6 个计划路径场景。均在 Windows PowerShell 5.1 下通过，不代表已经在真实 ESP/NVRAM 上执行安装。
 
+2026-10-26 首次安装在挂载校验处停止：`mountvol S: /S` 成功，但 `Get-Partition -DriveLetter S` 未找到对象。状态记录为 `entry_id=null`、`new_files_retained=false`、`unmount_exit_code=0`，未复制候选文件、未创建启动项，临时挂载已撤销，无需回滚候选安装。
+
+修正后先通过已验证分区取得 `Get-Volume.Path`，再使用 [Microsoft QueryDosDeviceW](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-querydosdevicew) 比较目标卷 GUID 名称和挂载盘符的当前 NT 设备映射。不能直接把分区 GUID 当作卷 GUID；也不会因盘符查询失败而跳过身份检查。安装与报告导出共用同一校验，查询失败或映射不一致均停止。新增 `tests/esp_mount_tests.ps1` 覆盖 11 种情况、13 项断言；并在本机 PowerShell 5.1 只读验证 C: 与其卷 GUID 映射一致，系统 ESP 的卷 GUID 可解析为 `\Device\HarddiskVolume1`。修正后尚需用户重新执行管理员安装才能验证实际 S: 挂载路径。
+
 ## 本机信任库解析结果
 
 2026-10-25 23:20 本机采集显示 SecureBoot=0、SetupMode=0；Intel SBoot1 平台密钥仍在。PK/KEK 与默认库一致，KEK 同时含微软 2011 与 2023 证书。当前 db 有五张证书：Microsoft Corporation UEFI CA 2011、Microsoft Windows Production PCA 2011、Windows UEFI CA 2023、Microsoft Option ROM UEFI CA 2023、Microsoft UEFI CA 2023。

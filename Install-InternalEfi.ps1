@@ -11,7 +11,7 @@ if ($partition.Count -ne 1 -or -not $partition[0].IsSystem -or $partition[0].Gpt
 $partition = $partition[0]
 $disk = $partition | Get-Disk
 if ($disk.PartitionStyle -ne 'GPT' -or $disk.BusType -notin @('NVMe','SATA') -or -not $disk.IsSystem) { throw 'Unsupported system disk.' }
-$volume = $partition | Get-Volume
+$volume = $partition | Get-Volume -ErrorAction Stop
 if ($volume.FileSystem -ne 'FAT32' -or $volume.HealthStatus -ne 'Healthy') { throw 'System ESP must be healthy FAT32.' }
 if (Confirm-SecureBootUEFI) { throw 'First disk test requires Secure Boot OFF; candidate is unsigned.' }
 $bl = Get-BitLockerVolume -MountPoint $env:SystemDrive
@@ -70,8 +70,8 @@ try {
     & "$env:SystemRoot\System32\mountvol.exe" $mount /S
     if ($LASTEXITCODE -ne 0) { throw 'Failed to mount system ESP.' }
     $mounted=$true; $state.mounted_letter=$mount; Save-State
-    $mountedPartition = Get-Partition -DriveLetter $letter
-    if ($mountedPartition.Guid -ne $partition.Guid) { throw 'Mounted ESP identity mismatch; no files copied.' }
+    $state.mount_identity = Assert-GpuEspMount -Mount $mount -ExpectedVolumePath $volume.Path
+    Save-State
     $root = $mount + '\'
     $efiParent = Join-Path $root 'EFI'
     $target = [IO.Path]::GetFullPath((Join-Path $efiParent 'GPUUnlock'))
@@ -105,7 +105,8 @@ try {
     Write-Output ('Disable this entry if needed (files retained): bcdedit /delete "' + $id + '"')
 } catch {
     $state.error=$_.Exception.Message; $state.phase='failed'; Save-State
-    Write-Warning ('Stopped. Copied files retained for inspection. State: ' + $statePath)
+    if ($state.new_files_retained) { Write-Warning ('Stopped. Copied files retained for inspection. State: ' + $statePath) }
+    else { Write-Warning ('Stopped before file copying; no candidate files installed. State: ' + $statePath) }
     throw
 } finally {
     if ($mounted) {

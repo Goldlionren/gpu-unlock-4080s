@@ -1,4 +1,48 @@
 # Loading this file makes no system changes.
+function Assert-GpuEspMount {
+    param(
+        [Parameter(Mandatory=$true)][ValidatePattern('^[A-Za-z]:$')][string]$Mount,
+        [Parameter(Mandatory=$true)][string]$ExpectedVolumePath,
+        [scriptblock]$QueryDevice
+    )
+    # The partition GUID and volume GUID are different identities in general.
+    # ExpectedVolumePath must come from Get-Volume for the verified partition.
+    if ($ExpectedVolumePath -notmatch '^\\\\\?\\(Volume\{[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}\})\\$') {
+        throw 'Expected ESP volume GUID path is missing or malformed.'
+    }
+    $volumeName=$Matches[1]
+    if (-not $QueryDevice) {
+        if (-not ('GpuUnlock.MountIdentity' -as [type])) {
+            Add-Type -TypeDefinition @'
+using System;
+using System.ComponentModel;
+using System.Runtime.InteropServices;
+using System.Text;
+namespace GpuUnlock {
+    public static class MountIdentity {
+        [DllImport("kernel32.dll", EntryPoint="QueryDosDeviceW", CharSet=CharSet.Unicode, ExactSpelling=true, SetLastError=true)]
+        private static extern uint QueryDosDevice(string name, StringBuilder buffer, uint capacity);
+        public static string Query(string name) {
+            var buffer = new StringBuilder(32768);
+            if (QueryDosDevice(name, buffer, (uint)buffer.Capacity) == 0)
+                throw new Win32Exception(Marshal.GetLastWin32Error(), "QueryDosDevice failed for " + name);
+            string value = buffer.ToString();
+            int end = value.IndexOf('\0');
+            return end < 0 ? value : value.Substring(0, end);
+        }
+    }
+}
+'@
+        }
+        $QueryDevice={param($Name) [GpuUnlock.MountIdentity]::Query($Name)}
+    }
+    $expected=[string](& $QueryDevice $volumeName)
+    $actual=[string](& $QueryDevice $Mount)
+    if ($expected -notmatch '^\\Device\\HarddiskVolume[0-9]+$' -or $actual -ne $expected) {
+        throw ('Mounted ESP identity mismatch: '+$Mount+' -> '+$actual+'; expected '+$ExpectedVolumePath+' -> '+$expected)
+    }
+    [pscustomobject]@{ mount=$Mount; volume_path=$ExpectedVolumePath; nt_device=$actual; verification='QueryDosDevice current mapping equality' }
+}
 function Get-GpuFirmwareOrder {
     param([string]$Text)
     $guid = '\{[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}\}'

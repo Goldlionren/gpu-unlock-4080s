@@ -2,6 +2,7 @@
 [CmdletBinding()]
 param([string]$InstallState)
 $ErrorActionPreference='Stop'
+. (Join-Path $PSScriptRoot 'tools\DiskBoot.Common.ps1')
 if (-not $InstallState) {
     $InstallState=Get-ChildItem -Path (Join-Path $PSScriptRoot 'LOCAL-disk-install\*\install-state.json') -File |
         Sort-Object LastWriteTime -Descending | Select-Object -First 1 -ExpandProperty FullName
@@ -11,6 +12,7 @@ $state=Get-Content -LiteralPath $InstallState -Raw | ConvertFrom-Json
 if ($state.phase -ne 'installed') { throw 'The selected installation did not finish; inspect its state first.' }
 $partition=@(Get-Partition | Where-Object { $_.Guid -eq $state.plan.partition_guid -and $_.IsSystem })
 if ($partition.Count -ne 1) { throw 'Installed system ESP identity not found.' }
+$volume=$partition[0] | Get-Volume -ErrorAction Stop
 $letters=@([IO.Directory]::GetLogicalDrives() | ForEach-Object {$_.Substring(0,1)}) + @(Get-PSDrive -PSProvider FileSystem | Select-Object -ExpandProperty Name)
 $letter=@('S','T','U','V','W','X','Y','Z') | Where-Object {$_ -notin $letters} | Select-Object -First 1
 if (-not $letter) { throw 'No free temporary ESP drive letter.' }
@@ -20,7 +22,7 @@ try {
     & "$env:SystemRoot\System32\mountvol.exe" $mount /S
     if ($LASTEXITCODE -ne 0) { throw 'ESP mount failed.' }
     $mounted=$true
-    if ((Get-Partition -DriveLetter $letter).Guid -ne $partition[0].Guid) { throw 'Mounted ESP identity mismatch.' }
+    $mountIdentity=Assert-GpuEspMount -Mount $mount -ExpectedVolumePath $volume.Path
     $root=Join-Path ($mount+'\') 'EFI\GPUUnlock'
     if ((Get-FileHash -LiteralPath (Join-Path $root 'GPUUnlock.efi') -Algorithm SHA256).Hash.ToLowerInvariant() -ne $state.plan.efi_sha256) { throw 'Installed EFI differs from installation state.' }
     $reports=@(Get-ChildItem -LiteralPath $root -Directory | Where-Object Name -Match '^RUN[0-9]{2}$' |
@@ -36,6 +38,7 @@ try {
     $latest=Join-Path $output ($reports[-1].Directory.Name+'-REPORT.TXT')
     [ordered]@{
         install_state=$InstallState
+        mount_identity=$mountIdentity
         last_windows_boot=(Get-CimInstance Win32_OperatingSystem).LastBootUpTime.ToUniversalTime().ToString('o')
         secure_boot=(Confirm-SecureBootUEFI)
         latest_report=$latest
