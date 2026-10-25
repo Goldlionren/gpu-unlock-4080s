@@ -57,7 +57,8 @@ enum {SUCCESS,SECURE_ON,LOG_FAIL,WATCHDOG_FAIL,TARGET_BAD,ASSET_FAIL,NO_WINDOWS,
     POST_CORE_CFG_DRIFT,FINAL_CONFIG_READ_FAIL,RESTORE_PARTIAL_ERROR,
     RUN03_STATUS_CLEAR,STATUS_NEW_ERROR,STATUS_CONTROL_DRIFT,PREFIRMWARE_STATUS_CLEAR,STATUS_CLEAR_NO_FLR,
     INTERNAL_SAME_ESP,INTERNAL_SECURE_ON,SECURE_SETUP_MODE,SECURE_READ_FAIL,SECURE_BAD_VALUE,SETUP_READ_FAIL,
-    SS0_36,SS0_37,SS0_UNSTABLE,SS0_AND_SS1_BAD,SS0_PROM_BAD,SS0_READ_FAULT};
+    SS0_36,SS0_37,SS0_UNSTABLE,SS0_AND_SS1_BAD,SS0_PROM_BAD,SS0_READ_FAULT,
+    SS0_UNKNOWN,SS0_POST_PROM_DRIFT,SS0_POST_PROM_FAULT,SS0_OTHER_PROFILE_BAD};
 #define CHECK(x) do{Checks++;if(!(x)){fprintf(stderr,"app FAIL line %d mode %u: %s\n",__LINE__,Mode,#x);exit(1);}}while(0)
 
 static void Put(UINT8 *p,UINT64 value,UINTN bytes){for(UINTN i=0;i<bytes;i++)p[i]=(UINT8)(value>>(i*8));}
@@ -192,12 +193,16 @@ UINT32 GuRead32(UINT32 offset){
     if(CoreCalls){if(offset==0x82381c)return Mode==SELECTOR_BAD?0x64113035:0x88888888;if(offset==0x823820)return 8;if(offset==0x1fa828)return 0;if(offset==0x110100)return 0x10;CHECK(0);}
     if(offset==0x82381c) {
         ColdSs0Reads++;
+        if(Mode==SS0_POST_PROM_FAULT&&ColdSs0Reads==3){Gu.fault=TRUE;return 0xffffffff;}
+        if(Mode==SS0_POST_PROM_DRIFT)return ColdSs0Reads==3?0x64113037:0x64113036;
+        if(Mode==SS0_UNKNOWN)return 0x64113038;
         if(Mode==SS0_READ_FAULT&&ColdSs0Reads==2){Gu.fault=TRUE;return 0xffffffff;}
         if(Mode==SS0_UNSTABLE)return ColdSs0Reads==1?0x64113035:0x64113037;
         if(Mode==SS0_37)return 0x64113037;
-        if(Mode==SS0_36||Mode==SS0_AND_SS1_BAD||Mode==SS0_PROM_BAD||Mode==SS0_READ_FAULT)return 0x64113036;
+        if(Mode==SS0_36||Mode==SS0_AND_SS1_BAD||Mode==SS0_PROM_BAD||Mode==SS0_READ_FAULT||Mode==SS0_POST_PROM_FAULT||Mode==SS0_OTHER_PROFILE_BAD)return 0x64113036;
     }
     if(offset==0x823820&&Mode==SS0_AND_SS1_BAD)return 3;
+    if(offset==0x1183a4&&Mode==SS0_OTHER_PROFILE_BAD)return 0x3ff9;
     for(UINTN i=0;i<ARRAY_SIZE(offsets);i++)if(offsets[i]==offset)return Mode==PROFILE_FAIL&&i==0?0:values[i];
     CHECK(0);return 0xffffffff;
 }
@@ -291,13 +296,18 @@ static void FinalPolicyTests(void){
 }
 int main(void){
     unsigned mode;
-    for(mode=SUCCESS;mode<=SS0_READ_FAULT;mode++){
-        BOOLEAN success=(BOOLEAN)(mode==SUCCESS||mode==RUN03_STATUS_CLEAR||mode==SECURE_ON||mode==INTERNAL_SAME_ESP||mode==INTERNAL_SECURE_ON);
+    for(UINT32 low=0;low<256;low++)CHECK(ColdSs0Allowed(0x64113000|low)==(low==0x35||low==0x36||low==0x37));
+    for(UINT32 base=0x64113035;base<=0x64113037;base++)
+        for(unsigned bit=8;bit<32;bit++)CHECK(!ColdSs0Allowed(base^(1u<<bit)));
+    CHECK(!ColdSs0Allowed(0)&&!ColdSs0Allowed(0xffffffff)&&!ColdSs0Allowed(0x88888888));
+    for(mode=SUCCESS;mode<=SS0_OTHER_PROFILE_BAD;mode++){
+        BOOLEAN success=(BOOLEAN)(mode==SUCCESS||mode==RUN03_STATUS_CLEAR||mode==SECURE_ON||mode==INTERNAL_SAME_ESP||mode==INTERNAL_SECURE_ON||mode==SS0_36||mode==SS0_37);
         EFI_STATUS result=EFI_SUCCESS;Setup(mode);
         if(setjmp(Handoff)==0){result=EfiMain(Img,&St);CHECK(!success);}
         else CHECK(success&&Starts==1&&strcmp(Phase,"windows-start")==0&&!Gu.retained);
         if(success){
             CHECK(Restores==1&&Releases==1&&CoreCalls==1&&HashCalls==2&&PromCopies==2&&WorkingClears==1&&StopContainments==0);
+            if(mode==SS0_36||mode==SS0_37)CHECK(ColdSs0Reads==3&&strstr(LogCapture,"observed_variant=1 PROM_verified=1")!=NULL);
             if(mode!=RUN03_STATUS_CLEAR)CHECK(strstr(LogCapture,"command_status=0 config_read_status=0 compared=1 differences=0")!=NULL);
             else {
                 CHECK(strstr(LogCapture,"entry config delta: offset=0x80 entry=0x92930 final=0x2930 xor=0x90000")!=NULL);
@@ -312,11 +322,10 @@ int main(void){
             CHECK(CoreLoads==0&&CoreCalls==0&&Starts==0&&!Gu.started);
             CHECK(Restores==1&&Releases==1&&!Held&&!memcmp(Config,Initial,sizeof(Config)));
             CHECK(strstr(LogCapture,"cold reg=0x8241e0 actual=0x1 expected=0x1")!=NULL);
-            if(mode==SS0_36||mode==SS0_37||mode==SS0_UNSTABLE) {
+            if(mode==SS0_UNSTABLE||mode==SS0_UNKNOWN||mode==SS0_POST_PROM_DRIFT||mode==SS0_POST_PROM_FAULT) {
                 CHECK(result==EFI_NOT_READY&&PromCopies==2&&HashCalls==2);
-                CHECK(strstr(LogCapture,"remaining profile and PROM verified; firmware not started")!=NULL);
             }
-            if(mode==SS0_AND_SS1_BAD||mode==SS0_READ_FAULT)CHECK(PromCopies==0&&HashCalls==0);
+            if(mode==SS0_AND_SS1_BAD||mode==SS0_READ_FAULT||mode==SS0_OTHER_PROFILE_BAD)CHECK(PromCopies==0&&HashCalls==0);
             if(mode==SS0_PROM_BAD)CHECK(result==EFI_CRC_ERROR&&PromCopies==2);
         }
         if(mode<=ADMISSION_FAIL){CHECK(MemWrites==0&&CoreCalls==0&&Starts==0&&Restores==0);}
