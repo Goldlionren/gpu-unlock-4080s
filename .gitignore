@@ -1,0 +1,10 @@
+/build/
+/USB/
+/offline_layout_build/
+/assets/*.bin
+/assets/cache/
+*.obj
+*.exe
+__pycache__/
+*.pyc
+/LOCAL-*

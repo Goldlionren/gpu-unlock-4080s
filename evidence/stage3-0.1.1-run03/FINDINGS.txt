@@ -1,0 +1,36 @@
+Stage3 0.1.1 / embedded RUN03
+Supplied REPORT_STAGE3_011.txt SHA256:
+840c8b6a61395014a3696cb6960e5bd19ff90b3d6e3edfb61a316f314257b50e
+Build 62ea5022a00176ff3d1e1ab9958441d375d05f6ef24768820d4126f126088476
+
+OBSERVED:
+The supplied report again shows core result0, required PLMs1, selectors before/after FLR1, recovered1.
+Command restoration step complete: before2 after0, Attributes0, API success.
+Original fault0, retained0; final config read succeeded.
+Only differing dword offset0x80: entry00092930 final00002930 XOR00090000.
+STOP containment success and maps0. No Windows handoff or performance evidence.
+
+DECODE:
+The captured capability chain60->68->78->b4 identifies PCIe capability at0x78.
+Device Control at capability+8 =0x80 remains0x2930.
+Device Status at capability+0x0a =0x82 changes0x0009->0:
+bit0 Correctable Error Detected and bit3 Unsupported Request Detected clear.
+Both bits were already set in Stage2 entry and final snapshots, before this unlock attempt.
+This is a change to recorded error history, not loss of Device Control configuration.
+The report establishes the change over the whole transaction; it does not identify the exact clearing operation/time.
+
+PRIMARY DEFINITIONS:
+Microsoft PCI_EXPRESS_DEVICE_STATUS_REGISTER:
+https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/miniport/ns-miniport-_pci_express_device_status_register
+Linux v6.17 pci_regs.h (DEVCTL+08 DEVSTA+0a CED0001 URD0008):
+https://github.com/torvalds/linux/blob/v6.17/include/uapi/linux/pci_regs.h
+Local pinned EDK2 Include/IndustryStandard/PciExpress21.h also names the bits.
+
+ROOT CAUSE AND 0.1.2 CORRECTION:
+The original all256 equality gate rejected this status-history clear.
+Final-only, board-specific exact exception: cap78 and dword80 00092930->00002930.
+Require fully successful core/outcome and final selectors/GSP verification plus exactly one FLR, started and quiesced, no fault.
+Every other byte remains exact. No broad status mask, new bits, partial transitions or control changes are accepted.
+No write to status, no payload changes, no driver/OS modification.
+Original hardware report and 0.1.1 binary/manifest archived beside this file.
+Windows initialization and actual Tensor performance remain UNKNOWN pending the user's next cold boot.

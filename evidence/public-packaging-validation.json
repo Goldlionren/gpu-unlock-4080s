@@ -1,0 +1,16 @@
+{
+  "source_matches_tested_manifest": true,
+  "tested_efi_hash_verified": true,
+  "portable_build_passed": true,
+  "default_build_core_test_skipped_explicitly": true,
+  "private_fixture_core_scenarios_passed": 43,
+  "new_firmware_executions": 0,
+  "local_document_links_checked": 32,
+  "host_test_logs": {
+    "port-results.log": "PASS: 14369 port assertions; direct command, DMA retention, FLR restore, STOP at command zero; host mocks only.",
+    "app-results.log": "app: 6910 assertions, 42 application integration scenarios passed; non-app layers mocked, no hardware execution",
+    "admission-results.log": "admission: 2141 assertions, 27 topology/ownership/failure scenarios passed"
+  },
+  "asset_download_network_tested": false,
+  "asset_cache_five_hashes_checked": true
+}

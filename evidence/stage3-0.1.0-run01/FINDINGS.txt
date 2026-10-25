@@ -1,0 +1,32 @@
+Stage3 0.1.0 / physical RUN01 review
+Input supplied as REPORT_STAGE3_RUN00.TXT; embedded run directory is RUN01.
+SHA256 a676c94981888577db4eabae06c198e1a1c090813b17f4e5cf2ab4ab2464d8a1
+Build 2e17b019226b948d349e6d00de8241a249649d6bb5b5fdb70d8811f108d4d2 matches archived manifest.
+
+OBSERVED in supplied runtime report:
+- Assets, entry profile and double PROM check passed.
+- FWSEC returned scratch=0 and initialized WPR2; SEC2 required PLMs matched.
+- FBPA remained ffffff0f, reported explicitly as nonfatal under existing policy.
+- SS0=88888888 and SS1=8 matched before and after FLR.
+- Core reported result=0, recovered=1, maps=0, quiesced=1.
+- Final selector/GSP check passed. Execution then stopped at entry-restore.
+- No FINAL success or Windows handoff appears in this report.
+
+UNKNOWN:
+- Original cause among command restore error, final config read error, full256 configuration mismatch.
+- Any specific differing configuration field; old build did not log it.
+- Windows driver initialization, retained selectors under Windows and performance benefit.
+
+SOURCE-CONFIRMED DIAGNOSTIC DEFECT:
+Stop called GuClearMaster, whose working-state gate requires command=2.
+If entry restoration already set command=0, this stop-only recheck creates EFI_DEVICE_ERROR and fault=1.
+Consequently the final containment error does not prove the original restore failed or BME remained enabled.
+This defect does not explain WHY the application first entered Stop; that remains unknown.
+
+0.1.1 RESPONSE:
+- Preserve strict full256 equality and core working command=2 gates.
+- Log command restore step/API status/values and all final differing dwords.
+- Capture cause state before STOP containment; emit saved diagnostics only after BME containment to avoid delaying it with USB I/O.
+- Give STOP a separate containment entry that accepts command0 or2, still clearing BME and checking identity/cache.
+- No changes to firmware payload, selectors, offsets, FLR sequence or asset bytes.
+- Another physical run is required; STOP may repeat, now with actionable diagnostics.

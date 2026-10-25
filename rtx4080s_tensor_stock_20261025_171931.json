@@ -1,0 +1,227 @@
+{
+  "timestamp": "2026-10-25T17:19:26+11:00",
+  "machine": "Windows-11-10.0.26200-SP0",
+  "python": "3.13.12",
+  "pytorch": "2.12.1+cu130",
+  "torch_cuda": "13.0",
+  "gpu": "NVIDIA GeForce RTX 4080 SUPER",
+  "compute_capability": [
+    8,
+    9
+  ],
+  "gpu_mem_total_mib": 16376,
+  "smi": "NVIDIA GeForce RTX 4080 SUPER, 0x270210DE, 0x470219DA, 581.57, 95.03.44.00.dd, 16376 MiB, 15426 MiB, 320.00 W",
+  "precision_settings": {
+    "float32_matmul_precision": "highest",
+    "allow_tf32": false,
+    "allow_fp16_reduced_precision_reduction": true,
+    "allow_bf16_reduced_precision_reduction": true
+  },
+  "benchmark": "PyTorch mm / torch._scaled_mm, CUDA events; no unlock, no altered model precision",
+  "rows": [
+    {
+      "median_ms": 0.49186,
+      "tflops": 34.929,
+      "repetitions_per_trial": 15,
+      "trials": 5,
+      "trial_ms": [
+        0.4922,
+        0.48952,
+        0.49282,
+        0.49186,
+        0.49172
+      ],
+      "size": 2048,
+      "dtype": "FP32_STRICT",
+      "status": "OK",
+      "kernel": "torch.mm"
+    },
+    {
+      "median_ms": 0.21668,
+      "tflops": 79.287,
+      "repetitions_per_trial": 15,
+      "trials": 5,
+      "trial_ms": [
+        0.21722,
+        0.21743,
+        0.21668,
+        0.21661,
+        0.21668
+      ],
+      "size": 2048,
+      "dtype": "FP16",
+      "status": "OK",
+      "kernel": "torch.mm"
+    },
+    {
+      "median_ms": 0.21699,
+      "tflops": 79.173,
+      "repetitions_per_trial": 15,
+      "trials": 5,
+      "trial_ms": [
+        0.21756,
+        0.21784,
+        0.21699,
+        0.21695,
+        0.21695
+      ],
+      "size": 2048,
+      "dtype": "BF16",
+      "status": "OK",
+      "kernel": "torch.mm"
+    },
+    {
+      "median_ms": 0.1174,
+      "tflops": 146.337,
+      "repetitions_per_trial": 15,
+      "trials": 5,
+      "trial_ms": [
+        0.11801,
+        0.1174,
+        0.11735,
+        0.11742,
+        0.11728
+      ],
+      "size": 2048,
+      "dtype": "FP8_E4M3",
+      "status": "OK",
+      "kernel": "torch._scaled_mm, BF16 output, fast_accum=False; includes cached output allocation"
+    },
+    {
+      "median_ms": 3.90721,
+      "tflops": 35.176,
+      "repetitions_per_trial": 15,
+      "trials": 5,
+      "trial_ms": [
+        3.86806,
+        3.90636,
+        3.90881,
+        3.90799,
+        3.90721
+      ],
+      "size": 4096,
+      "dtype": "FP32_STRICT",
+      "status": "OK",
+      "kernel": "torch.mm"
+    },
+    {
+      "median_ms": 1.42478,
+      "tflops": 96.463,
+      "repetitions_per_trial": 15,
+      "trials": 5,
+      "trial_ms": [
+        1.4734,
+        1.46104,
+        1.42478,
+        1.36998,
+        1.36492
+      ],
+      "size": 4096,
+      "dtype": "FP16",
+      "status": "OK",
+      "kernel": "torch.mm"
+    },
+    {
+      "median_ms": 1.36572,
+      "tflops": 100.635,
+      "repetitions_per_trial": 15,
+      "trials": 5,
+      "trial_ms": [
+        1.36697,
+        1.36513,
+        1.36572,
+        1.38566,
+        1.36517
+      ],
+      "size": 4096,
+      "dtype": "BF16",
+      "status": "OK",
+      "kernel": "torch.mm"
+    },
+    {
+      "median_ms": 0.6626,
+      "tflops": 207.425,
+      "repetitions_per_trial": 15,
+      "trials": 5,
+      "trial_ms": [
+        0.6626,
+        0.66053,
+        0.65946,
+        0.66314,
+        0.67113
+      ],
+      "size": 4096,
+      "dtype": "FP8_E4M3",
+      "status": "OK",
+      "kernel": "torch._scaled_mm, BF16 output, fast_accum=False; includes cached output allocation"
+    },
+    {
+      "median_ms": 30.6253,
+      "tflops": 35.902,
+      "repetitions_per_trial": 15,
+      "trials": 5,
+      "trial_ms": [
+        30.5961,
+        31.45297,
+        30.54318,
+        31.22285,
+        30.6253
+      ],
+      "size": 8192,
+      "dtype": "FP32_STRICT",
+      "status": "OK",
+      "kernel": "torch.mm"
+    },
+    {
+      "median_ms": 10.1591,
+      "tflops": 108.229,
+      "repetitions_per_trial": 15,
+      "trials": 5,
+      "trial_ms": [
+        10.18211,
+        10.18401,
+        10.1591,
+        10.15576,
+        10.1561
+      ],
+      "size": 8192,
+      "dtype": "FP16",
+      "status": "OK",
+      "kernel": "torch.mm"
+    },
+    {
+      "median_ms": 10.15474,
+      "tflops": 108.276,
+      "repetitions_per_trial": 15,
+      "trials": 5,
+      "trial_ms": [
+        10.15474,
+        10.15371,
+        10.17692,
+        10.15849,
+        10.15378
+      ],
+      "size": 8192,
+      "dtype": "BF16",
+      "status": "OK",
+      "kernel": "torch.mm"
+    },
+    {
+      "median_ms": 5.24274,
+      "tflops": 209.721,
+      "repetitions_per_trial": 15,
+      "trials": 5,
+      "trial_ms": [
+        5.24978,
+        5.24274,
+        5.24286,
+        5.24137,
+        5.2422
+      ],
+      "size": 8192,
+      "dtype": "FP8_E4M3",
+      "status": "OK",
+      "kernel": "torch._scaled_mm, BF16 output, fast_accum=False; includes cached output allocation"
+    }
+  ]
+}

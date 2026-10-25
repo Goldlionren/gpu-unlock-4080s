@@ -1,0 +1,278 @@
+{
+  "evidence_type": "hash-pinned local bytes and host-only pure layout function; no hardware execution",
+  "reference_commit": "51df9c17ec89eb8486df52cc9079dde4bd1f9974",
+  "manifest_authority": "root ASSETS-MANIFEST.json plus actual app_io.c Specs; inner unlock/assets.json is stale GA102",
+  "source_inputs": [
+    {
+      "name": "NVIDIA-kernel-module-source-610.43.03.tar.xz",
+      "url": "https://download.nvidia.com/XFree86/NVIDIA-kernel-module-source/NVIDIA-kernel-module-source-610.43.03.tar.xz",
+      "sha256": "7e118923c7a23edc36114d63273a46e3e04e9af98695a42203e7ac2dfe9fc1dc"
+    },
+    {
+      "name": "nvidia-utils-610.43.03-1-x86_64_v3.pkg.tar.zst",
+      "url": "https://archive.cachyos.org/archive/cachyos-v3/nvidia-utils-610.43.03-1-x86_64_v3.pkg.tar.zst",
+      "sha256": "e17e7c92eeffa178b0fe1f40eb17a47095f8fc3ce4a77bf115cf5bd5a4df86e9"
+    }
+  ],
+  "assets": {
+    "booter_load_ad102.bin": {
+      "bytes": 57672,
+      "sha256": "6ee05b20e1dc244c08c052f36ef28469b8d09f4955d1fe33e48a179e11a7fd49"
+    },
+    "gsp_boot_ad102.bin": {
+      "bytes": 36864,
+      "sha256": "45d6335a8185d6ff13e8d1484cea73f68d3d13aa1c19dc080ed1c3482dd5bac0"
+    },
+    "gsp_boot_desc_ad102.bin": {
+      "bytes": 84,
+      "sha256": "83f8f3f1f5f9496e0ea8fc7103c2beb64d0b6de2f5ffe725f13514de5a95fa42"
+    },
+    "gsp_ga10x.bin": {
+      "bytes": 84277400,
+      "sha256": "572373620a37418f24dc16b5031c39338778c3257e48e8408de9a57291b24f3a"
+    },
+    "v67-ad102-610.43.03-four-plm.bin": {
+      "bytes": 64000,
+      "sha256": "44c36b2d6b3424e53e18f3e55db85c833655de071ce66ce42749588a4a7dc8cb"
+    }
+  },
+  "stock_extraction": {
+    "arch": "AD102",
+    "source_files": {
+      "g_bindata_kgspGetBinArchiveBooterLoadUcode_AD102.c": "0504f640bc36d03c3b617b1d80cf6eee1c8022cdfffb52ed22405aaa316a1460",
+      "g_bindata_kgspGetBinArchiveGspRmBoot_AD102.c": "da110719ed6b680f26f3f7158f6731d1ff20fa859857238e23ac4935bd4cd91c",
+      "g_bindata_kgspGetBinArchiveBooterUnloadUcode_AD102.c": "11310bcd02216e0242eb5ccfda6f9f92f6b8c926829793d454a62580a83d11e0"
+    },
+    "booter": {
+      "os_code_off": 0,
+      "os_code_size": 256,
+      "os_data_off": 32256,
+      "os_data_size": 24576,
+      "num_apps": 1,
+      "app_code_off": 256,
+      "app_code_size": 32000,
+      "app_data_off": 256,
+      "app_data_size": 0,
+      "patch_loc": 32272,
+      "fuse_id": 1,
+      "engine_id": 1,
+      "ucode_id": 3,
+      "num_sigs": 2,
+      "sig_bytes": 768,
+      "image_size": 56832,
+      "bundle_bytes": 57672,
+      "bundle_sha256": "6ee05b20e1dc244c08c052f36ef28469b8d09f4955d1fe33e48a179e11a7fd49",
+      "image_sha256": "83e06ccd394eb73ab9e599a6db23be01e0df307d3ec4cfd64fa9499837a402da",
+      "signatures_sha256": "11d6c63d7cbcf60f9d2d3cf1a1ea3f248b718fc99882d11fb0d6396cb58fc516"
+    },
+    "gsp_boot": {
+      "version": 5,
+      "manifest_offset": 0,
+      "manifest_size": 2048,
+      "data_offset": 2048,
+      "data_size": 16384,
+      "code_offset": 18432,
+      "code_size": 10496,
+      "image_size": 36864,
+      "image_sha256": "45d6335a8185d6ff13e8d1484cea73f68d3d13aa1c19dc080ed1c3482dd5bac0",
+      "desc_bytes": 84,
+      "desc_sha256": "83f8f3f1f5f9496e0ea8fc7103c2beb64d0b6de2f5ffe725f13514de5a95fa42"
+    },
+    "derived_assets": {
+      "booter_load_ad102.bin": {
+        "bytes": 57672,
+        "sha256": "6ee05b20e1dc244c08c052f36ef28469b8d09f4955d1fe33e48a179e11a7fd49"
+      },
+      "booter_load_ad102_image_prod.bin": {
+        "bytes": 56832,
+        "sha256": "83e06ccd394eb73ab9e599a6db23be01e0df307d3ec4cfd64fa9499837a402da"
+      },
+      "booter_load_ad102_imem_0x7e00.bin": {
+        "bytes": 32256,
+        "sha256": "d54758b21d93c7a81d2c137d89b417114a84798dd982bdd70af4da567812c5cb"
+      },
+      "booter_load_ad102_dmem_0x6000.bin": {
+        "bytes": 24576,
+        "sha256": "1df396b92c0034e26d401abc0555e8330569794935cf3fbc923c8daa8c090659"
+      },
+      "gsp_boot_ad102.bin": {
+        "bytes": 36864,
+        "sha256": "45d6335a8185d6ff13e8d1484cea73f68d3d13aa1c19dc080ed1c3482dd5bac0"
+      },
+      "gsp_boot_desc_ad102.bin": {
+        "bytes": 84,
+        "sha256": "83f8f3f1f5f9496e0ea8fc7103c2beb64d0b6de2f5ffe725f13514de5a95fa42"
+      },
+      "AD102-DEBUG-CANDIDATE-PLAINTEXT.bin": {
+        "bytes": 32256,
+        "sha256": "9d5d95dae11df1b57035e82bbf1d88c77f913a786a1f01e2ab0598b3266acc75"
+      },
+      "booter_load_ad102_image_dbg_full.bin": {
+        "bytes": 56832,
+        "sha256": "8f1edc1cc980208eae1a25334d5f32e972b8cce3ad997c1d93a232be825b7441"
+      },
+      "booter_unload_ad102.bin": {
+        "bytes": 41544,
+        "sha256": "bf1495f15d00c3a41a6371747510be3d4803b98addf9097cf9e55bb3f7c2f6b3"
+      }
+    },
+    "booter_unload": {
+      "os_code_off": 0,
+      "os_code_size": 256,
+      "os_data_off": 20480,
+      "os_data_size": 19968,
+      "num_apps": 1,
+      "app_code_off": 256,
+      "app_code_size": 20224,
+      "app_data_off": 256,
+      "app_data_size": 0,
+      "patch_loc": 20496,
+      "fuse_id": 1,
+      "engine_id": 1,
+      "ucode_id": 3,
+      "num_sigs": 2,
+      "sig_bytes": 768,
+      "image_size": 40704,
+      "bundle_bytes": 41544,
+      "bundle_sha256": "bf1495f15d00c3a41a6371747510be3d4803b98addf9097cf9e55bb3f7c2f6b3",
+      "image_sha256": "8f83aef71b349cdbd3860aa81741a336b85d90e828b1bca89fce47b2dfd0867b",
+      "signatures_sha256": "b00585981170fc190a006e4c0786171b59d9fff0ad6388b1933990b747adde2e"
+    }
+  },
+  "gsp_elf": {
+    "file": "F:\\AI\\unlock_gpu\\windows_unlock_4080super\\assets\\gsp_ga10x.bin",
+    "bytes": 84277400,
+    "sha256": "572373620a37418f24dc16b5031c39338778c3257e48e8408de9a57291b24f3a",
+    "sections": {
+      ".fwimage": {
+        "offset": 64,
+        "offset_hex": "0x40",
+        "size": 84226048,
+        "sha256": "004394a6b5a217ef2445631f1e59fbca448d3d8aaa07e001898bf7569b98eec4"
+      },
+      ".fwsignature_cc_gr10x": {
+        "offset": 84226158,
+        "offset_hex": "0x505306e",
+        "size": 4096,
+        "sha256": "5857d35864ecf1bd99a2fe1dadd8e59fceb2a02a52372a6390de7d76131b2e87"
+      },
+      ".fwsignature_gr10x": {
+        "offset": 84230254,
+        "offset_hex": "0x505406e",
+        "size": 4096,
+        "sha256": "93d8324c16380312ef88e4e8b35f34f05cacf026a7f0b70907c98c8c392246f9"
+      },
+      ".fwsignature_gb20y": {
+        "offset": 84234350,
+        "offset_hex": "0x505506e",
+        "size": 4096,
+        "sha256": "8a326c912a03b090de177547d999c3d2e492c4fc7d842518efd2127368cbf9eb"
+      },
+      ".fwsignature_cc_gb20x": {
+        "offset": 84238446,
+        "offset_hex": "0x505606e",
+        "size": 4096,
+        "sha256": "e31477e9f73d5e0db21aa3c77d22bcd163a42374d4e66dfbc117cb1e154323f8"
+      },
+      ".fwsignature_gb20x": {
+        "offset": 84242542,
+        "offset_hex": "0x505706e",
+        "size": 4096,
+        "sha256": "3f694a244727949f0d4820c37967091a9eab66da89ee62542b02bcfc4752eed2"
+      },
+      ".fwsignature_cc_gb10x": {
+        "offset": 84246638,
+        "offset_hex": "0x505806e",
+        "size": 4096,
+        "sha256": "85a13fb31116de5908df5bb450b21f81b0073e3f93f959eaa231e1825dc1fff6"
+      },
+      ".fwsignature_gb10y": {
+        "offset": 84250734,
+        "offset_hex": "0x505906e",
+        "size": 4096,
+        "sha256": "7b7a2537e3be02a1275a4d450d95ead743dbde68dceab5e007af1c31e5595179"
+      },
+      ".fwsignature_gb10x": {
+        "offset": 84254830,
+        "offset_hex": "0x505a06e",
+        "size": 4096,
+        "sha256": "15209746a1ed49f370f57e239d8047f1db974b210efa56891bab25635c66238e"
+      },
+      ".fwsignature_cc_gh100": {
+        "offset": 84258926,
+        "offset_hex": "0x505b06e",
+        "size": 4096,
+        "sha256": "5f3a83181955d7117f864a2ad90144472928b4eae76837aabc901720ccb59f83"
+      },
+      ".fwsignature_gh100": {
+        "offset": 84263022,
+        "offset_hex": "0x505c06e",
+        "size": 4096,
+        "sha256": "9f1719ae7697156b63c165566b82eabc9bbb3097f1ed3fb5df0277d0e6f04aef"
+      },
+      ".fwsignature_ad10x": {
+        "offset": 84267118,
+        "offset_hex": "0x505d06e",
+        "size": 4096,
+        "sha256": "394612a0279ef8f8b457f91bfa35860e086d195d079975efa07b9f0938e019e7"
+      },
+      ".fwsignature_ga10x": {
+        "offset": 84271214,
+        "offset_hex": "0x505e06e",
+        "size": 4096,
+        "sha256": "aa6d335a6bdfd9440570d0475a6d17408008276f39330c5fb5785fd4fe65992e"
+      }
+    }
+  },
+  "capture_sha256": "4c65ad8928ef717eccd4cc59b32b4e0a6a69a85bb143a55055cb2818b59f67ea",
+  "measured_registers": {
+    "FB_SIZE_MB": "0x3ff8",
+    "VGA_BASE": "0x1",
+    "MMU_PLM": "0x45cb8f",
+    "MMU_LO": "0x100000",
+    "MMU_HI": "0x3cf7ff0"
+  },
+  "mmu_decoded": {
+    "low": "0x10000000",
+    "high": "0x3cf7ff000",
+    "high_rounded": "0x3cf800000",
+    "constrains_layout": false
+  },
+  "layout_input": {
+    "usable_fb": 17171480576,
+    "vga_base": 17170432000,
+    "mmu_lock_valid": false,
+    "mmu_lock_low": 268435456,
+    "frts_size": 1048576,
+    "boot_size": 36864,
+    "image_size": 84226048,
+    "nonwpr_size": 1048576,
+    "heap_request": 92274688
+  },
+  "layout": {
+    "return_code": 0,
+    "output": {
+      "reserved_top": 17170432000,
+      "wpr_end": 17170432000,
+      "frts_offset": 17169383424,
+      "boot_offset": 17169346560,
+      "gsp_offset": 17085104128,
+      "heap_offset": 16992174080,
+      "heap_size": 92274688,
+      "wpr_start": 16991125504,
+      "nonwpr_start": 16990076928
+    }
+  },
+  "layout_source_sha256": "349eac5f12127aa367abe812e85e0ba7862d11cef9fccff7232a0d7add8f2749",
+  "helper_sha256": "ecb477aa7e9365ffa36d34dd6dcf25caf53405b90286e5e1d2060e0619850223",
+  "assumptions": [
+    "88 MiB heap is inherited from reference without GSP clients; not a Windows performance allocation",
+    "MMU lock does not end at FB top, so reference decoder ignores it for top reservation"
+  ],
+  "hardware_execution_validated": false,
+  "unlock_validated": false,
+  "limitations": [
+    "Reference selector write -EIO can lead to return 0 during recovery; return code alone is not unlock success",
+    "Asset hashes prove byte identity, not signature acceptance on AD103 or Windows 581.57 compatibility"
+  ]
+}

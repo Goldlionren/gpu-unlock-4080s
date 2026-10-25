@@ -1,0 +1,18 @@
+{
+  "version": "stage3-0.1.2-experimental",
+  "build_id": "7273579f318e02b02d635f40d5dfe7f2785470fa491d292f555960f6703d19f2",
+  "efi_sha256": "252db18d5b170cb338ac5cb8944d9c77a93106f2ecd30ffad32d1354d658c7c2",
+  "zip_sha256": "b7a3dbed2aaf50ff71b56e0efe0fd50d124a8ed888e2f5c50c52f80bdc43b5bf",
+  "zip_bytes": 72884872,
+  "hardware_tested": false,
+  "performance_validated": false,
+  "gpu_firmware_executed_by_agent": false,
+  "port_tests": "PASS: 14369 port assertions; direct command, DMA retention, FLR restore, STOP at command zero; host mocks only.",
+  "app_tests": "app: 6910 assertions, 42 application integration scenarios passed; non-app layers mocked, no hardware execution",
+  "admission_tests": "admission: 2141 assertions, 27 topology/ownership/failure scenarios passed",
+  "core_scenarios": 43,
+  "app_scenarios": 42,
+  "change": "Final-only exact DEVSTA clear transition at0x80 00092930->00002930; verified successful one-FLR recovery required; all other bytes exact; no status writes.",
+  "previous_report_sha256": "840c8b6a61395014a3696cb6960e5bd19ff90b3d6e3edfb61a316f314257b50e",
+  "remaining": "Windows handoff/driver initialization and actual performance unvalidated"
+}

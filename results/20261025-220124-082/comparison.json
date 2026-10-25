@@ -1,0 +1,198 @@
+{
+  "scope": "Measured GEMM throughput under unchanged Python/PyTorch/CUDA/precision/kernel labels; two stock and two same-boot post runs",
+  "report_sha256": "30c5c70918984f4e93104eddf47d7585c28eecb4db8bc784b308f5667646afd2",
+  "sources": {
+    "rtx4080s_tensor_stock_20261025_171931.json": "2296c2c01683a72ae93e7ba7e7365c372bfa3b66894543068d82423ee536f0b1",
+    "rtx4080s_tensor_stock_20261025_172003.json": "c30248c14a8e569085f65a749d7b73fbc8fc4d6dfec8ac60052008b115abf376",
+    "results/20261025-220124-082/benchmark-1.json": "7aaf3314f0535bca3207f3ad1d6a4953fdc63843f3662b5d3bda1de3fea0bfe6",
+    "results/20261025-220124-082/benchmark-2.json": "f2488c87f15706a80d987ff73c7be2a128e2966114be93181f9601419f47abf8"
+  },
+  "rows": [
+    {
+      "size": 2048,
+      "dtype": "FP32_STRICT",
+      "stock_tflops": [
+        34.929,
+        34.953
+      ],
+      "after_tflops": [
+        34.769,
+        34.935
+      ],
+      "stock_mean": 34.941,
+      "after_mean": 34.852000000000004,
+      "gain_percent": -0.25
+    },
+    {
+      "size": 2048,
+      "dtype": "FP16",
+      "stock_tflops": [
+        79.287,
+        79.045
+      ],
+      "after_tflops": [
+        148.121,
+        148.734
+      ],
+      "stock_mean": 79.166,
+      "after_mean": 148.4275,
+      "gain_percent": 87.49
+    },
+    {
+      "size": 2048,
+      "dtype": "BF16",
+      "stock_tflops": [
+        79.173,
+        78.865
+      ],
+      "after_tflops": [
+        146.228,
+        149.352
+      ],
+      "stock_mean": 79.019,
+      "after_mean": 147.79000000000002,
+      "gain_percent": 87.03
+    },
+    {
+      "size": 2048,
+      "dtype": "FP8_E4M3",
+      "stock_tflops": [
+        146.337,
+        145.383
+      ],
+      "after_tflops": [
+        249.909,
+        251.156
+      ],
+      "stock_mean": 145.86,
+      "after_mean": 250.5325,
+      "gain_percent": 71.76
+    },
+    {
+      "size": 4096,
+      "dtype": "FP32_STRICT",
+      "stock_tflops": [
+        35.176,
+        35.103
+      ],
+      "after_tflops": [
+        33.454,
+        35.08
+      ],
+      "stock_mean": 35.1395,
+      "after_mean": 34.266999999999996,
+      "gain_percent": -2.48
+    },
+    {
+      "size": 4096,
+      "dtype": "FP16",
+      "stock_tflops": [
+        96.463,
+        95.218
+      ],
+      "after_tflops": [
+        162.504,
+        174.854
+      ],
+      "stock_mean": 95.84049999999999,
+      "after_mean": 168.679,
+      "gain_percent": 76.0
+    },
+    {
+      "size": 4096,
+      "dtype": "BF16",
+      "stock_tflops": [
+        100.635,
+        101.084
+      ],
+      "after_tflops": [
+        162.676,
+        174.263
+      ],
+      "stock_mean": 100.8595,
+      "after_mean": 168.46949999999998,
+      "gain_percent": 67.03
+    },
+    {
+      "size": 4096,
+      "dtype": "FP8_E4M3",
+      "stock_tflops": [
+        207.425,
+        208.09
+      ],
+      "after_tflops": [
+        350.701,
+        351.601
+      ],
+      "stock_mean": 207.7575,
+      "after_mean": 351.151,
+      "gain_percent": 69.02
+    },
+    {
+      "size": 8192,
+      "dtype": "FP32_STRICT",
+      "stock_tflops": [
+        35.902,
+        35.597
+      ],
+      "after_tflops": [
+        33.933,
+        35.271
+      ],
+      "stock_mean": 35.7495,
+      "after_mean": 34.602000000000004,
+      "gain_percent": -3.21
+    },
+    {
+      "size": 8192,
+      "dtype": "FP16",
+      "stock_tflops": [
+        108.229,
+        108.196
+      ],
+      "after_tflops": [
+        173.496,
+        174.49
+      ],
+      "stock_mean": 108.2125,
+      "after_mean": 173.993,
+      "gain_percent": 60.79
+    },
+    {
+      "size": 8192,
+      "dtype": "BF16",
+      "stock_tflops": [
+        108.276,
+        108.207
+      ],
+      "after_tflops": [
+        182.126,
+        180.823
+      ],
+      "stock_mean": 108.2415,
+      "after_mean": 181.4745,
+      "gain_percent": 67.66
+    },
+    {
+      "size": 8192,
+      "dtype": "FP8_E4M3",
+      "stock_tflops": [
+        209.721,
+        189.112
+      ],
+      "after_tflops": [
+        299.494,
+        297.909
+      ],
+      "stock_mean": 199.41649999999998,
+      "after_mean": 298.7015,
+      "gain_percent": 49.79
+    }
+  ],
+  "limits": [
+    "User confirmed automatic Windows handoff; same-boot continuity follows user statement and immediate collection.",
+    "GPU utilization before collection was20-23%; no additional Python/ComfyUI processes were found. Background GPU work and clocks were not controlled.",
+    "No independent numerical correctness test, long-term stability test, or ComfyUI workflow timing performed.",
+    "Performance gain does not establish persistence across reboot or exact internal driver kernel selection."
+  ]
+}

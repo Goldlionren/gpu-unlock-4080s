@@ -1,0 +1,14 @@
+* text=auto
+*.c text eol=lf
+*.h text eol=lf
+*.py text eol=lf
+*.md text eol=lf
+*.ps1 text eol=crlf
+*.cmd text eol=crlf
+*.EFI binary
+*.TXT -text
+results/**/*.json -text
+rtx4080s_tensor_stock_*.json -text
+src/** -text
+vendor/** -text
+evidence/tested-stage3-0.1.2/** -text

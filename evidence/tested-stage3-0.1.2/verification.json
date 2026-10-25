@@ -1,0 +1,14 @@
+{
+  "pe": "AMD64 EFI application, relocation, no imports/TLS/CLR",
+  "pinned_headers": 43,
+  "verified_asset_count": 5,
+  "mmio_write_layer": "port.c",
+  "source_audit": "passed",
+  "hardware_executed": false,
+  "logs": {
+    "port-results.log": "5025a196693af4c46a4e806d39f8913811a2168e2e29c699ca64af5b13221a8e",
+    "core-results.log": "848603651b9947e15ba9fe0afe68a0a92ada98e18a8c8f758bd6aaefd08889b3",
+    "app-results.log": "b579d1742b6ca4962748e399fcc630c320b47849a1bc951f528235a9d1105e13",
+    "admission-results.log": "b52f7cbbf89227a0de6fa65d834d3d77b5c867aa1f555f47d88269dc8cd79e0c"
+  }
+}
