@@ -26,6 +26,7 @@ $outputEfi = Join-Path $OutputDirectory 'GPUUnlock.efi'
 Copy-Item -LiteralPath $inputEfi -Destination $outputEfi
 & $SignToolPath sign /fd SHA256 /s My /sha1 $CertificateThumbprint /nph $outputEfi
 if ($LASTEXITCODE -ne 0) { throw 'SignTool failed; this output must not be installed.' }
+$crypto = & (Join-Path $PSScriptRoot 'Verify-EfiSignature.ps1') -SignedEfi $outputEfi -UnsignedEfi $inputEfi -CertificateThumbprint $CertificateThumbprint
 $signature = Get-AuthenticodeSignature -LiteralPath $outputEfi
 if (-not $signature.SignerCertificate -or $signature.SignerCertificate.Thumbprint -ne $cert.Thumbprint) { throw 'The signed image does not contain the expected signer certificate.' }
 [IO.File]::WriteAllBytes((Join-Path $OutputDirectory 'GPUUnlock-public.cer'), $cert.Export([Security.Cryptography.X509Certificates.X509ContentType]::Cert))
@@ -35,6 +36,7 @@ if (-not $signature.SignerCertificate -or $signature.SignerCertificate.Thumbprin
     signed_efi_sha256=(Get-FileHash -LiteralPath $outputEfi -Algorithm SHA256).Hash.ToLowerInvariant()
     certificate_thumbprint=$cert.Thumbprint
     windows_authenticode_status=[string]$signature.Status
+    cryptographic_verification=$crypto
     firmware_db_enrolled=$false
     secure_boot_hardware_tested=$false
     note='A matching signer is not proof of firmware trust. No firmware keys, ESP or boot entries were changed.'

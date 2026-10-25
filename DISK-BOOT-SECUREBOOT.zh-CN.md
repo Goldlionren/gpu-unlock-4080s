@@ -4,6 +4,8 @@
 
 更新至 2026-10-26：已安装到本机 ESP、创建独立启动项，并完成一次硬盘启动与 GPU 事务，用户确认自动返回 Windows。**本次 Secure Boot=0，未登记签名证书，也没有 Secure Boot 开启状态的成功报告或本次新性能数据。** 0.1.2 的历史性能不能直接作为本次性能结果。
 
+后续签名进展：签名 EFI 已生成、通过密码学和内容一致性校验并安装到 ESP；固件证书登记尚待 BIOS Setup Mode。最新步骤与实际哈希见 [本机签名与 Secure Boot 登记](SECUREBOOT-SIGNING.zh-CN.md)。
+
 本次 [RUN00 报告](evidence/disk-boot-stage3-0.2.0-run00/REPORT.TXT) 和 [核验记录](evidence/disk-boot-stage3-0.2.0-run00/verification.json) 表明：internal_volume=1、事务 result=0、required_plm=1、FLR 前后选择器匹配、recovered=1、retained=0、maps=0、最终 status=0。all_plm=0 对应已知非致命 FBPA 未匹配，不能描述成四个 PLM 全部成功。报告 SHA256 为 `cd48ed65bd14489879551f3a9837bb4d30519b2f3acc37f98f9cce0c0c5dd26f`。报告 build ID、安装包 EFI 哈希、当前源码与原候选 manifest 均已交叉核对。
 
 原构建 manifest 的 hardware_tested=false 及程序头部未实测提示是构建时状态，保留作为历史记录；上述新增证据记录这次后续实机结果。采集器没有独立证明报告与 Windows 同一次启动，返回 Windows 的关联同时依赖用户本次操作确认。
@@ -62,7 +64,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File F:\AI\gpu-unlock-4080s\Get-B
 
 该目录已被 Git 忽略。读不到某个默认变量不等于硬件失败；需要查看具体 error。若隐藏 ESP 的剩余空间未返回，下一步再按明确分区进行临时只读检查。BitLocker 若启用，在改变引导路径前必须确认用户持有恢复密钥；脚本不会替用户关闭保护或公开恢复密钥。
 
-## 签名工具已准备，尚未生成或登记证书
+## 签名工具
 
 `Sign-EfiCandidate.ps1` 读取已构建 manifest，核对候选 EFI 哈希，从 `Cert:\CurrentUser\My` 使用已有、有效且有私钥的 RSA 证书，调用 Windows SDK SignTool：
 
@@ -75,7 +77,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File F:\AI\gpu-unlock-4080s\Get-B
 
 匹配到 SignerCertificate 只是签名者检查，Windows Authenticode 状态也不等于固件 db 验证结果。脚本记录状态，不宣称固件已信任。签名后 EFI 哈希会变化，应使用 signing-manifest 的 signed hash，不能继续用 unsigned manifest 的哈希冒充最终镜像。
 
-私钥应留在本机证书存储或专门离线保管，不能提交 Git；`*.pfx / *.p12 / *.key` 和 `LOCAL-*` 已忽略。当前没有创建或导出私钥。
+私钥应留在本机证书存储或专门离线保管，不能提交 Git；`*.pfx / *.p12 / *.key` 和 `LOCAL-*` 已忽略。现已在 Admin 的 CurrentUser\My 中创建不可导出的本机签名私钥；没有导出私钥。此处为工具说明，实际签名安装与固件登记状态见上方最新记录。
 
 ## 验证与下一轮顺序
 
