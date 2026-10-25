@@ -1,5 +1,7 @@
 # RTX 4080 SUPER 16GB UEFI unlock experiment
 
+**当前分支新增 0.2.0 硬盘启动 / Secure Boot 候选适配，尚未实机验证。** 下面的成功与性能数据仍属于归档的 0.1.2。新方案、只读采集与签名工具见 [硬盘启动与 Secure Boot 说明](DISK-BOOT-SECUREBOOT.zh-CN.md)。
+
 Windows 11 Pro 上的一次真实实机适配与测量。成功版本 **stage3-0.1.2**：在 Windows 启动前运行自定义 UEFI 程序，核对 SS0/SS1 写入及 FLR 后读回，恢复设备后自动进入原 Windows。
 
 **这是单块已测板卡的实验代码，不是通用 RTX 40 系列工具。** 入口固定为 AD103、`10de:2702 / 19da:4702`、16GB、特定 BAR/ROM 哈希与 Intel GOP 拓扑。Secure Boot 关闭；不刷写 VBIOS、不替换 NVIDIA Windows 驱动。其他板卡应被检查拒绝，不能靠删除检查获得兼容性。
@@ -49,13 +51,13 @@ python tools\fetch_assets.py
 powershell -NoProfile -ExecutionPolicy Bypass -File .\Build.ps1
 ```
 
-该命令编译 EFI，并运行 port/app/admission 主机模拟测试、校验 PE/资产/源码，再生成 USB 目录。完整 core 事务测试需要本机实测 PROM fixture，因其包含固件字节而不公开；缺省时明确记录 **SKIPPED**，不会假报通过。已有完全匹配 fixture 时：
+该命令编译当前候选 EFI，并运行 boot-media/port/app/admission 主机模拟测试、校验 PE/资产/源码，再生成 USB 与 Disk 目录。它不会安装到实际 ESP 或改变启动项。完整 core 事务测试需要本机实测 PROM fixture，因其包含固件字节而不公开；缺省时明确记录 **SKIPPED**，不会假报通过。已有完全匹配 fixture 时：
 
 ```powershell
 .\Build.ps1 -PromPath 'C:\your-local-capture\physical_prom_prefix.bin'
 ```
 
-fixture 仅接受 SHA256 `dd5a21fc1434583d3660de35f60799c2cce3b72cd5330dd1d7e5b042a0785f6f`。原实测构建的 43 个 core 场景日志已保留。`src/` 与已实测 manifest 一致；顶层构建/打包/路径工具为公开版调整，重新构建的 build ID/EFI 哈希会变化，不代表新增实机验证。
+fixture 仅接受 SHA256 `dd5a21fc1434583d3660de35f60799c2cce3b72cd5330dd1d7e5b042a0785f6f`。原实测构建的 43 个 core 场景日志已保留。本分支 `src/` 已发生候选改动，不能与已实测 0.1.2 源码等同；原版本源码在 Git 历史中。旧 EFI 和原始证据未改动。
 
 ## 核验数据与性能采集
 
@@ -64,6 +66,8 @@ fixture 仅接受 SHA256 `dd5a21fc1434583d3660de35f60799c2cce3b72cd5330dd1d7e5b0
 ```powershell
 python tools\verify_results.py
 ```
+
+该命令核验历史数据与归档 EFI，并明确报告当前源码相对已测版本的差异。如需把完全相同的已测源码作为强制条件，增加 `--require-tested-source`；当前开发分支应拒绝该检查。
 
 成功自动进入 Windows 后，在**同一启动周期**退出其他 GPU 负载，传入当前实际报告路径和你自己的 Python：
 

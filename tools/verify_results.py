@@ -3,6 +3,11 @@ from pathlib import Path
 import hashlib
 import json
 import statistics
+import argparse
+
+parser=argparse.ArgumentParser(description=__doc__)
+parser.add_argument("--require-tested-source",action="store_true",help="Also require current source to match the hardware-tested 0.1.2 source")
+args=parser.parse_args()
 
 ROOT=Path(__file__).resolve().parents[1]
 def load(path):
@@ -30,6 +35,11 @@ for n in (2048,4096,8192):
         print(f"{n:4} {dtype:12} {before:.4f} -> {after:.4f} TFLOPS {gain:+.2f}%")
 manifest=load(ROOT/"evidence/tested-stage3-0.1.2/manifest.json")
 assert sha(ROOT/"artifacts/stage3-0.1.2/BOOTX64.EFI")==manifest["efi_sha256"]
-for name,h in manifest["source_sha256"].items():
-    assert sha(ROOT/name)==h,name
-print("PASS: four benchmark files, report, tested EFI and exact tested C source hashes")
+changed=[name for name,h in manifest["source_sha256"].items() if not (ROOT/name).is_file() or sha(ROOT/name)!=h]
+added=[str(p.relative_to(ROOT)).replace("\\","/") for p in (ROOT/"src").rglob("*") if p.is_file() and str(p.relative_to(ROOT)).replace("\\","/") not in manifest["source_sha256"]]
+print("PASS: four benchmark files, report and archived hardware-tested EFI hashes")
+if changed or added:
+    print("CURRENT SOURCE DIFFERS from tested 0.1.2: "+", ".join(changed+added))
+    print("Historical hardware/performance results do NOT validate the current candidate.")
+if args.require_tested_source:
+    assert not changed and not added,"Current source is not the tested 0.1.2 source"

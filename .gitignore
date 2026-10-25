@@ -8,3 +8,7 @@
 __pycache__/
 *.pyc
 /LOCAL-*
+/Disk/
+*.pfx
+*.p12
+*.key

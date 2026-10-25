@@ -47,14 +47,15 @@ static EFI_HANDLE Img=(EFI_HANDLE)(UINTN)100,Usb=(EFI_HANDLE)(UINTN)101,
     Gpu=(EFI_HANDLE)(UINTN)1,Internal=(EFI_HANDLE)(UINTN)201,
     Other=(EFI_HANDLE)(UINTN)202,Win=(EFI_HANDLE)(UINTN)300;
 static UINT8 InternalPath[]={1,1,6,0,0,2,0x7f,0xff,4,0};
-GU_PLATFORM Gu;GU_ASSET GuAssets[5];BOOLEAN GuScreenDetached;
+GU_PLATFORM Gu;GU_ASSET GuAssets[5];BOOLEAN GuScreenDetached,GuInternalBoot;
 enum {SUCCESS,SECURE_ON,LOG_FAIL,WATCHDOG_FAIL,TARGET_BAD,ASSET_FAIL,NO_WINDOWS,MULTI_WINDOWS,
     LOAD_FAIL,CANCEL,KEY_TIMEOUT,ADMISSION_FAIL,ADMISSION_PARTIAL,MEM_ENABLE_PARTIAL,MEM_IGNORED,
     PROFILE_FAIL,PROM_BAD,CORE_LOAD_FAIL,CORE_STARTED_FAIL,OUTCOME_BAD,SELECTOR_BAD,
     RESTORE_FAIL,RELEASE_FAIL,START_RETURNS,LOG_CLOSE_FAIL,MASTER_FAIL,UNSAFE_CORE,
     MEM_BME_UNEXPECTED,MEM_IO_BME_UNEXPECTED,PROM_CFG_DRIFT,LOG_CFG_DRIFT,LOAD_WRONG_VOLUME,LOAD_WRONG_TYPE,LOAD_NULL_OBJECT,
     POST_CORE_CFG_DRIFT,FINAL_CONFIG_READ_FAIL,RESTORE_PARTIAL_ERROR,
-    RUN03_STATUS_CLEAR,STATUS_NEW_ERROR,STATUS_CONTROL_DRIFT,PREFIRMWARE_STATUS_CLEAR,STATUS_CLEAR_NO_FLR};
+    RUN03_STATUS_CLEAR,STATUS_NEW_ERROR,STATUS_CONTROL_DRIFT,PREFIRMWARE_STATUS_CLEAR,STATUS_CLEAR_NO_FLR,
+    INTERNAL_SAME_ESP,INTERNAL_SECURE_ON,SECURE_SETUP_MODE,SECURE_READ_FAIL,SECURE_BAD_VALUE,SETUP_READ_FAIL};
 #define CHECK(x) do{Checks++;if(!(x)){fprintf(stderr,"app FAIL line %d mode %u: %s\n",__LINE__,Mode,#x);exit(1);}}while(0)
 
 static void Put(UINT8 *p,UINT64 value,UINTN bytes){for(UINTN i=0;i<bytes;i++)p[i]=(UINT8)(value>>(i*8));}
@@ -133,7 +134,14 @@ static EFI_STATUS EFIAPI Start(EFI_HANDLE h,UINTN *size,CHAR16 **data){
 }
 static EFI_STATUS EFIAPI Variable(CHAR16 *name,EFI_GUID *guid,UINT32 *attrs,UINTN *size,VOID *value){
     CHECK(name[0]==L'S'&&BytesEqual(guid,&GlobalGuid,16)&&attrs==NULL&&*size==1);
-    *(UINT8*)value=Mode==SECURE_ON?1:0;return EFI_SUCCESS;
+    if(name[1]==L'e'&&name[2]==L't'){
+        if(Mode==SETUP_READ_FAIL)return EFI_DEVICE_ERROR;
+        *(UINT8*)value=Mode==SECURE_SETUP_MODE?1:0;return EFI_SUCCESS;
+    }
+    if(Mode==SECURE_READ_FAIL)return EFI_DEVICE_ERROR;
+    *(UINT8*)value=Mode==SECURE_BAD_VALUE?2:
+        (Mode==SECURE_ON||Mode==INTERNAL_SECURE_ON||Mode==SECURE_SETUP_MODE||Mode==SETUP_READ_FAIL?1:0);
+    return EFI_SUCCESS;
 }
 static EFI_STATUS EFIAPI Watchdog(UINTN t,UINT64 code,UINTN n,CHAR16 *data){
     CHECK(t==0&&code==0&&n==0&&data==NULL&&MemWrites==0);return Mode==WATCHDOG_FAIL?EFI_DEVICE_ERROR:EFI_SUCCESS;
@@ -237,7 +245,8 @@ static void Setup(unsigned mode){
     Bs.LocateHandleBuffer=Locate;Bs.HandleProtocol=Handle;Bs.FreePool=FreePool;Bs.LoadImage=Load;
     Bs.StartImage=Start;Bs.UnloadImage=Unload;Bs.Stall=Stall;Bs.SetWatchdogTimer=Watchdog;
     Rs.GetVariable=Variable;Input.ReadKeyStroke=Key;St.BootServices=&Bs;St.RuntimeServices=&Rs;St.ConIn=&Input;
-    Loaded.DeviceHandle=Usb;WinLoaded.DeviceHandle=mode==LOAD_WRONG_VOLUME?Usb:Internal;
+    GuInternalBoot=(BOOLEAN)(mode==INTERNAL_SAME_ESP||mode==INTERNAL_SECURE_ON);
+    Loaded.DeviceHandle=GuInternalBoot?Internal:Usb;WinLoaded.DeviceHandle=mode==LOAD_WRONG_VOLUME?Usb:Internal;
     WinLoaded.ImageCodeType=mode==LOAD_WRONG_TYPE?EfiBootServicesCode:EfiLoaderCode;
     Fs.OpenVolume=OpenVolume;Root.Open=OpenFile;Root.Close=CloseFile;WinFile.Close=CloseFile;
     Mode=mode;ConfigReads=MemWrites=Reserves=Releases=Restores=CoreCalls=CoreLoads=0;
@@ -272,13 +281,14 @@ static void FinalPolicyTests(void){
 }
 int main(void){
     unsigned mode;
-    for(mode=SUCCESS;mode<=STATUS_CLEAR_NO_FLR;mode++){
+    for(mode=SUCCESS;mode<=SETUP_READ_FAIL;mode++){
+        BOOLEAN success=(BOOLEAN)(mode==SUCCESS||mode==RUN03_STATUS_CLEAR||mode==SECURE_ON||mode==INTERNAL_SAME_ESP||mode==INTERNAL_SECURE_ON);
         EFI_STATUS result=EFI_SUCCESS;Setup(mode);
-        if(setjmp(Handoff)==0){result=EfiMain(Img,&St);CHECK(mode!=SUCCESS&&mode!=RUN03_STATUS_CLEAR);}
-        else CHECK((mode==SUCCESS||mode==RUN03_STATUS_CLEAR)&&Starts==1&&strcmp(Phase,"windows-start")==0&&!Gu.retained);
-        if(mode==SUCCESS||mode==RUN03_STATUS_CLEAR){
+        if(setjmp(Handoff)==0){result=EfiMain(Img,&St);CHECK(!success);}
+        else CHECK(success&&Starts==1&&strcmp(Phase,"windows-start")==0&&!Gu.retained);
+        if(success){
             CHECK(Restores==1&&Releases==1&&CoreCalls==1&&HashCalls==2&&PromCopies==2&&WorkingClears==1&&StopContainments==0);
-            if(mode==SUCCESS)CHECK(strstr(LogCapture,"command_status=0 config_read_status=0 compared=1 differences=0")!=NULL);
+            if(mode!=RUN03_STATUS_CLEAR)CHECK(strstr(LogCapture,"command_status=0 config_read_status=0 compared=1 differences=0")!=NULL);
             else {
                 CHECK(strstr(LogCapture,"entry config delta: offset=0x80 entry=0x92930 final=0x2930 xor=0x90000")!=NULL);
                 CHECK(strstr(LogCapture,"verified_flr=1 accepted_ced_urd_clear=1 configuration_accepted=1")!=NULL);
@@ -287,6 +297,7 @@ int main(void){
             continue;
         }
         CHECK(EFI_ERROR(result));
+        if(mode>=SECURE_SETUP_MODE)CHECK(result==EFI_SECURITY_VIOLATION&&MemWrites==0&&CoreCalls==0&&Starts==0&&Reserves==0);
         if(mode<=ADMISSION_FAIL){CHECK(MemWrites==0&&CoreCalls==0&&Starts==0&&Restores==0);}
         if(mode==ADMISSION_PARTIAL)CHECK(MemWrites==0&&Releases==1&&!Held&&CoreCalls==0);
         if(mode==MEM_ENABLE_PARTIAL||mode==MEM_IGNORED||mode==PROFILE_FAIL||mode==PROM_BAD||mode==CORE_LOAD_FAIL)

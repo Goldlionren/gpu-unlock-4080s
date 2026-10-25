@@ -51,7 +51,7 @@ def main():
     require('FinalEntryMatches(FinalConfig,EntryConfig,FinalRecoveryVerified,Gu.pcie_cap,&StatusClearAccepted)' in app and 'entry config delta:' in app, 'Missing final configuration check/diagnostics')
     require('entry[0x80/4]!=0x00092930' in app and 'final[0x80/4]!=0x00002930' in app and 'memcmp(normalized,entry,sizeof(normalized))' in app, 'Missing bounded DEVSTA clear policy')
     require('SetWatchdogTimer(0,0,0,NULL)' in app, 'Missing watchdog disable')
-    logs = {name: (ROOT / 'build' / name).read_text(errors='replace') for name in ('port-results.log', 'core-results.log', 'app-results.log', 'admission-results.log')}
+    logs = {name: (ROOT / 'build' / name).read_text(errors='replace') for name in ('port-results.log', 'core-results.log', 'app-results.log', 'admission-results.log', 'boot-media-results.log')}
     for name, log in logs.items():
         if name == 'core-results.log' and log.strip() == 'SKIPPED: proprietary board PROM fixture not supplied; core binary compiled only.':
             continue

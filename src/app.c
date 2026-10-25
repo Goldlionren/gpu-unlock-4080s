@@ -123,7 +123,9 @@ static EFI_STATUS PreloadWindows(VOID) {
     if(EFI_ERROR(s)||!handles||count>128){if(handles)Gu.bs->FreePool(handles);return EFI_UNSUPPORTED;}
     for(UINTN i=0;i<count;i++) {
         EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *fs=NULL;EFI_FILE_PROTOCOL *root=NULL,*file=NULL;
-        if(handles[i]==AppVolume)continue;
+        /* A disk installation can share the Windows ESP. Still require one
+         * unambiguous internal Windows loader and validate its loaded volume. */
+        if(handles[i]==AppVolume&&!GuInternalBoot)continue;
         s=Gu.bs->HandleProtocol(handles[i],&FsGuid,(VOID**)&fs);if(EFI_ERROR(s)||!fs)continue;
         s=fs->OpenVolume(fs,&root);if(EFI_ERROR(s)||!root)continue;
         s=root->Open(root,&file,(CHAR16*)Name,EFI_FILE_MODE_READ,0);
@@ -238,7 +240,15 @@ EFI_STATUS EFIAPI EfiMain(EFI_HANDLE image,EFI_SYSTEM_TABLE *st) {
     GuLog("build_id=%s CAP_STAGE2_0002=4c65ad8928ef717eccd4cc59b32b4e0a6a69a85bb143a55055cb2818b59f67ea\n",UNLOCK_BUILD_ID);
     UINT8 secure=1;UINTN size=1;Phase="secure-boot";
     s=st->RuntimeServices->GetVariable(L"SecureBoot",&GlobalGuid,NULL,&size,&secure);
-    if(EFI_ERROR(s)||size!=1||secure){s=EFI_SECURITY_VIOLATION;goto finish;}
+    if(EFI_ERROR(s)||size!=1||secure>1){s=EFI_SECURITY_VIOLATION;goto finish;}
+    if(secure) {
+        UINT8 setup=1;size=1;
+        s=st->RuntimeServices->GetVariable(L"SetupMode",&GlobalGuid,NULL,&size,&setup);
+        if(EFI_ERROR(s)||size!=1||setup!=0){s=EFI_SECURITY_VIOLATION;goto finish;}
+    }
+    /* Firmware performs executable authentication before this entry point.
+     * This program never enrolls keys or overrides LoadImage authentication. */
+    GuLog("boot policy: secure_boot=%u internal_volume=%u firmware_authentication_not_overridden=1\n",secure,GuInternalBoot);
     Phase="watchdog";s=Gu.bs->SetWatchdogTimer?Gu.bs->SetWatchdogTimer(0,0,0,NULL):EFI_UNSUPPORTED;
     if(EFI_ERROR(s))goto finish;
     Phase="target";s=Target();if(EFI_ERROR(s))goto finish;

@@ -45,6 +45,10 @@ $commands.Add('if errorlevel 1 exit /b 1')
 $commands.Add('link /nologo /subsystem:efi_application /entry:EfiMain /machine:x64 /nodefaultlib /incremental:no /fixed:no /dynamicbase:no /nxcompat:no /out:build\RTX4080S-UNLOCK.EFI ' + ($objects -join ' ') + ' build\efi-runtime.obj')
 $commands.Add('if errorlevel 1 exit /b 1')
 if (-not $CompileOnly) {
+    $commands.Add('cl ' + $commonFlags + ' tests\boot_media_tests.c src\core.c /Febuild\boot-media-tests.exe /Fobuild\')
+    $commands.Add('if errorlevel 1 exit /b 1')
+    $commands.Add('build\boot-media-tests.exe > build\boot-media-results.log 2>&1')
+    $commands.Add('if errorlevel 1 exit /b 1')
     $commands.Add('cl ' + $commonFlags + ' tests\port_tests.c src\port.c /Febuild\port-tests.exe /Fobuild\')
     $commands.Add('if errorlevel 1 exit /b 1')
     $commands.Add('build\port-tests.exe > build\port-results.log 2>&1')
@@ -75,7 +79,7 @@ try {
     & python tools\verify_build.py
     if ($LASTEXITCODE -ne 0) { throw 'Artifact/source/asset verification failure' }
     $binary = Join-Path $PSScriptRoot 'build\RTX4080S-UNLOCK.EFI'
-    $manifest = [ordered]@{ version='stage3-0.1.2-experimental'; build_id=$buildId; efi_sha256=(Get-FileHash -LiteralPath $binary -Algorithm SHA256).Hash.ToLowerInvariant(); source_sha256=$sourceHashes; hardware_tested=$false; performance_validated=$false; unlock_implemented=$true; real_gpu_executed_by_build=$false; tests='port and transaction faults; app flow mocks; PE/assets/source checks'; target='10de:2702/19da:4702/AD103/16GB'; source_reference='51df9c17ec89eb8486df52cc9079dde4bd1f9974'; utc=[DateTime]::UtcNow.ToString('o') }
+    $manifest = [ordered]@{ version='stage3-0.2.0-disk-candidate'; build_id=$buildId; efi_sha256=(Get-FileHash -LiteralPath $binary -Algorithm SHA256).Hash.ToLowerInvariant(); source_sha256=$sourceHashes; hardware_tested=$false; performance_validated=$false; unlock_implemented=$true; real_gpu_executed_by_build=$false; tests='port and transaction faults; app flow mocks; PE/assets/source checks'; target='10de:2702/19da:4702/AD103/16GB'; source_reference='51df9c17ec89eb8486df52cc9079dde4bd1f9974'; utc=[DateTime]::UtcNow.ToString('o') }
     $manifest | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath build\manifest.json -Encoding utf8
     New-Item -ItemType Directory -Path USB\EFI\BOOT,USB\RTX4080S-UNLOCK\ASSETS -Force | Out-Null
     Copy-Item -LiteralPath $binary -Destination USB\EFI\BOOT\BOOTX64.EFI -Force
@@ -84,5 +88,11 @@ try {
     Copy-Item -LiteralPath build\manifest.json -Destination USB\RTX4080S-UNLOCK\manifest.json -Force
     Copy-Item -LiteralPath LICENSES -Destination USB\RTX4080S-UNLOCK -Recurse -Force
     Copy-Item -LiteralPath assets\verified-manifest.json -Destination USB\RTX4080S-UNLOCK\assets-manifest.json -Force
+    New-Item -ItemType Directory -Path Disk\EFI\GPUUnlock\ASSETS -Force | Out-Null
+    Copy-Item -LiteralPath $binary -Destination Disk\EFI\GPUUnlock\GPUUnlock.efi -Force
+    foreach ($asset in $assets.PSObject.Properties) { Copy-Item -LiteralPath ('assets\' + $asset.Name) -Destination Disk\EFI\GPUUnlock\ASSETS -Force }
+    Copy-Item -LiteralPath build\manifest.json -Destination Disk\EFI\GPUUnlock\manifest.json -Force
+    Copy-Item -LiteralPath assets\verified-manifest.json -Destination Disk\EFI\GPUUnlock\assets-manifest.json -Force
+    Copy-Item -LiteralPath LICENSES -Destination Disk\EFI\GPUUnlock -Recurse -Force
     Write-Output ('Validated experimental EFI: ' + $binary)
 } finally { Pop-Location }

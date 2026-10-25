@@ -8,4 +8,5 @@ EFI_STATUS GuSavePromDump(const VOID *Data,UINTN Size);
 VOID GuReleaseAssets(VOID);
 BOOLEAN GuLogReady(VOID);
 extern BOOLEAN GuScreenDetached;
+extern BOOLEAN GuInternalBoot;
 VOID GuConsole(const char *Text);

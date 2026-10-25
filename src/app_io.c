@@ -6,12 +6,14 @@
 #include <Protocol/LoadedImage.h>
 #include <Protocol/SimpleFileSystem.h>
 #include <Guid/FileInfo.h>
+#include "boot_media.h"
 static EFI_GUID LoadedGuid=EFI_LOADED_IMAGE_PROTOCOL_GUID,PathGuid=EFI_DEVICE_PATH_PROTOCOL_GUID,
   FsGuid=EFI_SIMPLE_FILE_SYSTEM_PROTOCOL_GUID,InfoGuid=EFI_FILE_INFO_ID;
 static EFI_SYSTEM_TABLE *Table;
 static EFI_FILE_PROTOCOL *Root,*Parent,*Run,*Report;
 static BOOLEAN LogFault;
 BOOLEAN GuScreenDetached;
+BOOLEAN GuInternalBoot;
 typedef struct {const char *name;CHAR16 *file;UINTN size;const char *hash;} ASSET_SPEC;
 static const ASSET_SPEC Specs[]={
  {"gpu-unlock/610.43.03/booter_load_ad102.bin",L"ASSETS\\booter_load_ad102.bin",57672,"6ee05b20e1dc244c08c052f36ef28469b8d09f4955d1fe33e48a179e11a7fd49"},
@@ -44,20 +46,10 @@ VOID GuLog(const char *Format,...) {
   GuLogText(text);
 }
 BOOLEAN GuLogReady(VOID){return Report && !LogFault;}
-static BOOLEAN UsbPath(EFI_HANDLE Handle) {
+static UINTN BootMedia(EFI_HANDLE Handle) {
   EFI_DEVICE_PATH_PROTOCOL *path=NULL;
   if(EFI_ERROR(Table->BootServices->HandleProtocol(Handle,&PathGuid,(VOID **)&path)) || !path)return FALSE;
-  UINTN total=0;BOOLEAN usb=FALSE;
-  for(UINTN nodes=0;nodes<64 && total+4<=4096;nodes++) {
-    UINTN n=path->Length[0]+((UINTN)path->Length[1]<<8);
-    if(n<4 || n>4096-total)return FALSE;
-    if(path->Type==MESSAGING_DEVICE_PATH &&
-      ((path->SubType==MSG_USB_DP && n==sizeof(USB_DEVICE_PATH)) ||
-       (path->SubType==MSG_SD_DP && n==sizeof(SD_DEVICE_PATH))))usb=TRUE;
-    if(path->Type==END_DEVICE_PATH_TYPE)return usb && n==4 && path->SubType==END_ENTIRE_DEVICE_PATH_SUBTYPE;
-    total+=n;path=(VOID *)((UINT8 *)path+n);
-  }
-  return FALSE;
+  return GuBootMedia((const UINT8*)path,4096);
 }
 static EFI_STATUS Metadata(EFI_FILE_PROTOCOL *File,BOOLEAN Directory,UINTN Expected) {
   union {EFI_FILE_INFO info;UINT8 bytes[512];} data;UINTN n=sizeof(data);
@@ -69,14 +61,17 @@ static EFI_STATUS Metadata(EFI_FILE_PROTOCOL *File,BOOLEAN Directory,UINTN Expec
   return EFI_SUCCESS;
 }
 EFI_STATUS GuIoOpen(EFI_HANDLE Image,EFI_SYSTEM_TABLE *St) {
-  Table=St;Root=Parent=Run=Report=NULL;LogFault=FALSE;memset(GuAssets,0,sizeof(GuAssets));
+  Table=St;Root=Parent=Run=Report=NULL;LogFault=FALSE;GuInternalBoot=FALSE;memset(GuAssets,0,sizeof(GuAssets));
   EFI_LOADED_IMAGE_PROTOCOL *loaded=NULL;EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *fs=NULL;
   EFI_STATUS status=Table->BootServices->HandleProtocol(Image,&LoadedGuid,(VOID **)&loaded);
-  if(EFI_ERROR(status) || !loaded || !UsbPath(loaded->DeviceHandle))return EFI_UNSUPPORTED;
+  if(EFI_ERROR(status) || !loaded)return EFI_UNSUPPORTED;
+  UINTN media=BootMedia(loaded->DeviceHandle);
+  if(!media)return EFI_UNSUPPORTED;
+  GuInternalBoot=(BOOLEAN)(media==2);
   status=Table->BootServices->HandleProtocol(loaded->DeviceHandle,&FsGuid,(VOID **)&fs);
   if(EFI_ERROR(status) || !fs)return EFI_UNSUPPORTED;
   status=fs->OpenVolume(fs,&Root);if(EFI_ERROR(status) || !Root)return EFI_DEVICE_ERROR;
-  status=Root->Open(Root,&Parent,L"\\RTX4080S-UNLOCK",EFI_FILE_MODE_READ|EFI_FILE_MODE_WRITE,0);
+  status=Root->Open(Root,&Parent,GuInternalBoot?L"\\EFI\\GPUUnlock":L"\\RTX4080S-UNLOCK",EFI_FILE_MODE_READ|EFI_FILE_MODE_WRITE,0);
   if(EFI_ERROR(status) || !Parent)return EFI_NOT_FOUND;
   status=Metadata(Parent,TRUE,0);if(EFI_ERROR(status))return status;
   for(UINTN slot=0;slot<100;slot++) {
@@ -95,7 +90,7 @@ EFI_STATUS GuIoOpen(EFI_HANDLE Image,EFI_SYSTEM_TABLE *St) {
     if(status!=EFI_NOT_FOUND)return status;
     status=Run->Open(Run,&Report,L"REPORT.TXT",EFI_FILE_MODE_READ|EFI_FILE_MODE_WRITE|EFI_FILE_MODE_CREATE,0);
     if(EFI_ERROR(status) || !Report)return EFI_DEVICE_ERROR;
-    GuLog("RTX4080 SUPER 16GB / Windows UEFI experimental unlock stage3-0.1.2\nRUN%02u\nIntel GOP retained. One explicit U starts one firmware transaction. Selector mismatch is FAILURE; Windows handoff requires strict recovery and selector readback. This revision has not been hardware tested; Windows handoff and performance remain unvalidated.\n",(unsigned)slot);
+    GuLog("RTX4080 SUPER 16GB / Windows UEFI experimental unlock stage3-0.2.0-disk-candidate\nRUN%02u\nIntel GOP retained. One explicit U starts one firmware transaction. Selector mismatch is FAILURE; Windows handoff requires strict recovery and selector readback. This revision has not been hardware tested; Windows handoff and performance remain unvalidated.\n",(unsigned)slot);
     GuLogText("PIO readback is not an execution gate. This path does not independently verify TCM contents; FWSEC scratch/WPR results are required.\n");
     return GuLogReady()?EFI_SUCCESS:EFI_DEVICE_ERROR;
   }
